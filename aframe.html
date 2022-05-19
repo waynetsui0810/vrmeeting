@@ -1,0 +1,1072 @@
+<html>
+	<head>
+		<title>POC on WebVR using AFrame</title>		
+		<link rel="stylesheet" type="text/css" href="css/style.css" />
+		<script src="scripts/jquery/jquery-3.6.0.min.js"></script>
+		<script src="scripts/bootstrap.min.js"></script>
+		<script src="scripts/adapter-latest.js"></script>
+		<script src="scripts/aframe.min.js"></script>		
+		<script src="scripts/networked-aframe.min.js"></script>  
+		<script src="scripts/aframe-environment-component.min.js"></script>		
+		<script src="scripts/dynamic-room-component.js"></script>
+		<script src="scripts/aframe-extras.min.js"></script>
+		<script src="scripts/naf-janus-adapter.js"></script>
+		<script>
+			AFRAME.components["networked-scene"].schema.connectOnLoad.default = false;
+			
+			AFRAME.registerComponent('spectator',{
+				'schema': {
+					canvas: {
+						type: 'string',
+						default: ''
+					},
+					// desired FPS of spectator dislay
+					fps: {
+						type: 'number',
+						default: '30.0'
+					}
+				},
+				'init': function() {
+					var targetEl = document.querySelector(this.data.canvas)
+
+					this.counter = 0;
+					this.renderer = new THREE.WebGLRenderer( { antialias: true } );
+
+					this.renderer.setPixelRatio( window.devicePixelRatio );
+					this.renderer.setSize( targetEl.offsetWidth, targetEl.offsetHeight );
+
+					// creates spectator canvas
+					targetEl.appendChild(this.renderer.domElement);
+				},
+				'tick': function(time, timeDelta) {
+					var loopFPS = 1000.0 / timeDelta;
+					var hmdIsXFasterThanDesiredFPS = loopFPS / this.data.fps;
+					var renderEveryNthFrame = Math.round(hmdIsXFasterThanDesiredFPS);
+
+					if(this.counter % renderEveryNthFrame === 0){
+						this.render(timeDelta);
+					}
+					this.counter += 1;  
+				},
+				'render': function(){
+					this.renderer.render( this.el.sceneEl.object3D , this.el.object3DMap.camera );
+				}
+			});
+	  
+			AFRAME.registerComponent('video-functions', {
+				init: function() {
+					let self = this;
+					this.el.addEventListener('click', function(event) {
+						var v = document.getElementById('demo');						
+						if (!v.paused) {
+							v.pause();
+						} else {
+							v.play();
+						}
+					})
+				}
+			});			
+			
+			NAF.schemas.getComponentsOriginal = NAF.schemas.getComponents;
+			NAF.schemas.getComponents = (template) => {
+				if (!NAF.schemas.hasTemplate("#avatar-template")) {
+					NAF.schemas.add({
+						template: '#avatar-template',
+						components: [
+							'position',
+							'rotation',
+							'animation-mixer',
+							{
+								selector: '.head',
+								component: 'material',
+								property: 'color'
+							},
+							{
+								selector: '.nametag',
+								component: 'text',
+								property: 'value'
+							},
+							{
+								selector: '.nametagBack',
+								component: 'text',
+								property: 'value'
+							}
+						]
+					});
+				}
+				
+				if (!NAF.schemas.hasTemplate("#share-screen-template")) {
+					NAF.schemas.add({
+						template: '#share-screen-template',
+						components: [
+							'position',
+							'rotation'
+						]
+					});
+				}
+				
+				const components = NAF.schemas.getComponentsOriginal(template);
+				return components;
+			}
+		</script>
+		<script src="scripts/aframe-randomizer-components.min.js"></script>
+		<script src="scripts/aframe-particle-system-component.min.js"></script>
+		<script src="scripts/spawn-in-circle.component.js"></script>
+		<script src="scripts/color-changer.js"></script>
+		<script src="scripts/aframe-inspector-plugin-recast.js"></script>
+		<script src="scripts/Geometry.js"></script>
+		<script src="scripts/aframe-look-at-component.min.js"></script>
+		
+  </head>
+  <body>
+	<div id="meetingroom_div"></div>  	
+	<div id="chatUI">
+		<input id="message-input" type="text"/>
+		<button id="send-text-btn">Send</button>
+		<div id="chat-messages" class="chatMessage"></div>		
+	</div>
+	<div id="spectatorDiv" style="opacity: 0;text-align: right;background-color: transparent;">
+		<button id="zoomIn-btn" onclick="this.blur();">+</button>
+		<button id="zoomOut-btn" onclick="this.blur();">-</button>
+	</div>
+	<div id="participantUI"></div>
+	
+	<a-scene id="scene" dynamic-room networked-scene
+		cursor="rayOrigin: mouse"
+		raycaster="objects:.raycastable"
+		inspector-plugin-recast
+		>
+		<a-assets timeout="5000">
+			<video id="demo" src="video/MS_vs_Meta.mp4"></video>			
+			<img id="pink" src="images/1hyyIUi.jpg" crossorigin="anonymous" />
+			<img src="images/floor.png" id="grid" crossorigin="anonymous" />
+			<img src="images/WMNH2OF.jpg" id="chrome" crossorigin="anonymous" />
+			<img id="sky" src="images/WqlqEkq.jpg" crossorigin="anonymous" />
+			<img id="ha" src="images/ha_logo.png" crossorigin="anonymous" />
+
+			<a-asset-item id="dawningFont" src="fonts/dawningOfANewDayRegular.typeface.json?1490305922844"></a-asset-item>
+			<a-asset-item id="exoFont" src="fonts/exo2Black.typeface.json?1490305922150"></a-asset-item>
+			<a-asset-item id="exoItalicFont" src="fonts/exo2BlackItalic.typeface.json?1490305922725"></a-asset-item>
+			
+			<a-asset-item id="avatarModel1" src="glb/avatar_v4.gltf"></a-asset-item>
+			
+			<a-asset-item id="tableCross" src="glb/tableCross.glb"></a-asset-item>
+			<a-asset-item id="chairDesk" src="glb/chairDesk.glb"></a-asset-item>
+			<a-asset-item id="wall" src="glb/wall.glb"></a-asset-item>
+			<a-asset-item id="wallCorner" src="glb/wallCorner.glb"></a-asset-item>
+			<a-asset-item id="wallDoorway" src="glb/wallDoorway.glb"></a-asset-item>
+			<a-asset-item id="pottedPlant" src="glb/pottedPlant.glb"></a-asset-item>
+			<a-asset-item id="trashcan" src="glb/trashcan.glb"></a-asset-item>
+			<a-asset-item id="floor" src="glb/floorFull.glb"></a-asset-item>
+			<a-asset-item id="trashcan2" src="glb/trash_can.glb"></a-asset-item>
+			<a-asset-item id="table" src="glb/table_2.gltf"></a-asset-item>
+			<a-asset-item id="plant" src="glb/plant.glb"></a-asset-item>
+			<a-asset-item id="flower" src="glb/flower.glb"></a-asset-item>
+			<a-asset-item id="computerchair" src="glb/computerchair.glb"></a-asset-item>
+			<a-asset-item id="navmesh" src="glb/navmesh_2.gltf"></a-asset-item>
+			
+			<!-- Network asset -->			
+			<template id="share-screen-template">
+				<a-entity class="share_screen">
+					<!--<a-entity look-at="#player" class="scr" geometry="primitive: plane; width: 8; height: 4.5;" position = "0 3.5 2" rotation="0 180 0" material="side:front;" networked-video-source="streamName: screen"></a-entity>-->
+					<a-entity class="scr_user" id="scr_user"  scale="6 6 6" position="2.8 8.8 -3" material="color:#000000" rotation="0 -90 0" text="value: ? is sharing screen" ></a-entity>
+					<!--<a-entity class="scr" geometry="primitive: plane; width: 12; height: 6.75;" position = "2.8 5 -3.5" rotation="0 -90 0" material="side:front;" networked-video-source="streamName: screen"></a-entity>-->
+					<a-entity class="scr" geometry="primitive: plane; width: 12; height: 6.75;" position = "2.8 5 -3.5" rotation="0 -90 0" material="side:front;" networked-video-source></a-entity>
+				</a-entity>
+			</template>
+									
+			<template id="avatar-template">				
+				<a-entity class="avatar">	
+					<a-entity id="voice" class="voice" networked-audio-source></a-entity>
+					<a-entity id="nametag" class="nametag" text="value: ??; align:center;" position="0 3.5 0" rotation="0 180 0" scale="3 3 3"></a-entity>
+					<a-entity id="nametagBack" class="nametagBack" text="value: ??; align:center;" position="0 3.5 0" rotation="0 0 0" scale="3 3 3"></a-entity>
+					<a-entity id="head" class="head" gltf-model="#avatarModel1" rotation="0 180 0" scale="1.6 1.6 1.6" position="0 -2 0"></a-entity>
+				</a-entity>
+			</template>
+			<div id="template_div"></div>			
+		</a-assets>
+		<!--<div id="player_div"></div>	-->
+		<a-entity id="player" movement-controls="constrainToNavMesh:true;" position="-14 0 3" animation-mixer="clip:idle;" look-controls>
+			<a-entity id="cam" camera position="0 2.6 0">
+			</a-entity>
+			<a-entity id="nametag" class="nametag" text="value: ??; align:center;" position="0 3.5 0.6" rotation="0 180 0" scale="3 3 3">
+			</a-entity>
+			<a-entity id="nametagBack" class="nametagBack" text="value: ??; align:center;" position="0 3.5 0.6" rotation="0 0 0" scale="3 3 3"> 
+			</a-entity>
+			<a-entity id="corp" class="corp">
+			</a-entity>
+			<a-entity id="localAvatar" class="localAvatar" rotation="0 180 0" scale="1.6 1.6 1.6" position="0 0 0.6">
+			</a-entity>			
+		</a-entity>
+		<!--adds the text with custom font-->
+		<a-entity position="-3 1 -6" rotation="5 0 0">		
+			<a-entity
+				rotation="0 0 0"
+				position="-8 4 -5">
+				<a-image src="#ha"></a-image>
+			</a-entity>
+			<a-entity
+				rotation="0 0 0"
+				position="2 4 -5"
+				text="font: aileronsemibold; value: Hospital Authority; width: 18;"
+				material="color:lavenderblush; metalness:1; roughness: 0; sphericalEnvMap: #pink;">
+			</a-entity>
+			<!--adds the text with custom font-->
+			<a-entity position="-1 3 -5" scale="0.6 1.2 1" text="font: aileronsemibold; value: POC on WebVR; width: 16;" material="color:pink; metalness:0.9; roughness: 0.05; sphericalEnvMap: #chrome;"></a-entity>
+		</a-entity>
+		
+		<a-entity class="scr_background" geometry="primitive: plane; width: 12; height: 6.75;" position = "3 5 -3.5" rotation="0 -90 0" material="color:#000000"></a-entity>
+			
+		<a-entity
+			  geometry="primitive: plane; width: 50; height: 50;" rotation="-90 0 0"
+			  material="src: #grid; repeat: 50 50; transparent: true;metalness:0.6; roughness: 0.4; sphericalEnvMap: #sky;">
+		</a-entity>
+
+		<!--adds the lighting to make the scene more realistic-->
+		<!--
+		<a-entity light="color: #ccccff; intensity: 1; type: ambient;" visible=""></a-entity>
+		<a-entity light="color: #ffaaff; intensity: 1.5" position="5 5 5"></a-entity>
+		-->
+		<!--adds the sky-->
+		<!--<a-sky src="#sky" rotation="0 -90 0"></a-sky>-->
+<!--		<a-sky src="#sky" radius="50" ></a-sky> -->
+		<a-entity id="room" position="0 0 0">
+			<a-entity id="wall1" gltf-model="#wall" scale="12 8 2" position="-8 0.2 4"></a-entity>
+			<a-entity id="door" gltf-model="#wallDoorway" scale="12 8 2" position="-20 0.2 4"></a-entity>
+			<a-entity id="wall3" gltf-model="#wall" scale="16 8 2" position="-20 0.2 -12" rotation="0 -90 0"></a-entity>			
+			<a-entity id="wall4" gltf-model="#wall" scale="16 8 2" position="4 0.2 4" rotation="0 90 0"></a-entity>
+			<a-entity id="wall2" gltf-model="#wall" scale="24 8 2" position="4 0.2 -12" rotation="0 180 0"></a-entity>		
+			<a-entity id="plant1" gltf-model="#plant" scale="0.02 0.02 0.02" position="-18.3 0.2 2.275" rotation="270 0 0"></a-entity>
+			<a-entity id="flower1" gltf-model="#flower" scale="0.025 0.025 0.025" position="-4.5 1.54 -1.683" rotation="270 0 0"></a-entity>
+			<a-entity id="flower2" gltf-model="#flower" scale="0.025 0.025 0.025" position="-8 1.54 -1.683" rotation="270 90 0"></a-entity>
+			<a-entity id="table" gltf-model="#table" scale="0.9 0.65 0.9" position="-5.68 0.2 -3" rotation="0 90 0"></a-entity>
+			<a-entity id="computerchair1" class="raycastable" gltf-model="#computerchair" scale="0.23 0.23 0.23" rotation="0 180 0" position="-4.6 0.2 0.924"></a-entity>
+			<a-entity id="computerchair2" class="raycastable" gltf-model="#computerchair" scale="0.23 0.23 0.23" rotation="0 180 0" position="-8 0.2 0.924"></a-entity>
+			<a-entity id="computerchair3" class="raycastable" gltf-model="#computerchair" scale="0.23 0.23 0.23" rotation="0 0 0" position="-4.6 0.2 -4.34"></a-entity>
+			<a-entity id="computerchair4" class="raycastable" gltf-model="#computerchair" scale="0.23 0.23 0.23" rotation="0 0 0" position="-8 0.2 -4.34"></a-entity>
+			<a-entity id="trashcan" gltf-model="#trashcan2" scale="2.3 1.5 1.5" position="-18.7 0.2 -11.19" rotation="0 0 0"></a-entity>			
+			
+			<a-entity id="navmesh" gltf-model="#navmesh" nav-mesh position="0 0.1 0" visible="false"></a-entity>
+		</a-entity>
+		
+		<a-video class="raycastable" id="demoVideo" src="#demo" width="8" height="4.5" position="-6.5 5 3.5" rotation="0 180 0" video-functions></a-video>
+
+		<a-entity id="secondaryCamera" position="0 15 0" rotation="-90 0 0">
+			<a-camera spectator="canvas:#spectatorDiv;" active="false" wasd-controls-enabled="false" look-controls-enabled="false">
+			</a-camera>
+		</a-entity>
+    </a-scene>
+	
+	<div class="actions">
+		<button id="audio-btn" type="button" class="button">Mute</button>
+		<button id="camera-btn" type="button" class="button">Show Camera</button>		
+		<button id="screen-btn" type="button" class="button">Share screen</button>				
+		<button id="greetings-btn" type="button" class="button greetings-btn">Greetings</button>
+		<!--<button id="waving-btn" type="button" class="button g-btn"><img src="images/wave_hand.png"/></button>-->
+		<!--<button id="shake-hand-btn" type="button" class="button g-btn"><img src="images/handshake3.png"/></button>-->
+		<!--<button id="raise-hand-btn" type="button" class="button g-btn"><img src="images/raisehand.png"/></button>-->
+		<img id="waving-btn" class="g-btn" width="32" height="32" src="images/wave_hand.png" alt="Wave Hand" title="Wave Hand"/>
+		<img id="shake-hand-btn" class="g-btn" width="32" height="32" src="images/handshake3.png" alt="Shake Hand" title="Shake Hand"/>
+		<img id="raise-hand-btn" class="g-btn" width="32" height="32" src="images/raisehand.png" alt="Raise Up Hand" title="Raise Up Hand"/>
+		<button id="sit-btn" type="button" class="button g-btn">Sit</button>
+		<button id="map-btn" type="button" class="button" onclick="this.blur();">Map</button>
+	</div>
+
+	<div class="ava-actions">
+		<img id="pm-btn" src="images/private_message.png" alt="Private Message" title="Private Message" width="32" height="32" />
+		<img id="teleport-btn" src="images/teleport.png" alt="Teleport To" title="Teleport To" width="32" height="32" />
+	</div>
+	
+	<div id="pm-div" class="pm-div">
+		<p><span id="pm-target"></span><button id="close-pm-btn">Close PM</button></p>
+		<input id="pm-message-input" type="text">
+		<button id="send-pm-text-btn">Send PM</button>
+		<div id="pm-messages"></div>
+	</div>
+
+	<script>
+		const params = getUrlParams();
+		console.log(params);
+		const usersMap = {};
+		const pmMap = {};
+		const state = {};
+		const playerInfo = {};
+		const chairs = {};
+		chairs.a = false;
+		chairs.b = false;
+		chairs.c = false;
+		chairs.d = false;
+		chairs.e = false;
+		chairs.f = false;
+		chairs.g = false;
+		chairs.h = false;
+		
+		state.currentStream = null;
+		state.cameraEnabled = false;		
+		state.screenEnabled = false;
+		state.audioEnabled = true;
+		state.stand = true;
+		
+		const ledColor = ["#64ff00", "#64ff00", "#9bff00", "#d4ff00", "#fbff00", "#ffd500", "#ffa600", "#ff5d00", "#ff0800", "#ff0800"];
+		const sysMessages = {};
+		sysMessages.shareCam = "Camera sharing by: ";
+		sysMessages.stopCam = "Camera sharing stopped.";
+		sysMessages.shareScreen = "Screen sharing by: ";
+		sysMessages.stopScreen = "Screen sharing stopped.";
+		
+		const scene = document.querySelector('a-scene');
+		const sendTextBtnEl = document.getElementById('send-text-btn');		
+		const audioBtnEl = document.getElementById('audio-btn');
+		const cameraBtnEl = document.getElementById('camera-btn');	
+		const screenBtnEl = document.getElementById('screen-btn');
+		const wavingBtnEl = document.getElementById('waving-btn');	
+		const shakeHandBtnEl = document.getElementById('shake-hand-btn');	
+		const raiseHandBtnEl = document.getElementById('raise-hand-btn');	
+		const sitBtnEl = document.getElementById('sit-btn');	
+
+		const pmBtnEl = document.getElementById('pm-btn');
+		const closePmBtnEl = document.getElementById('close-pm-btn');
+		const sendPmTextBtnEl = document.getElementById('send-pm-text-btn');
+		
+		const teleportBtnEl = document.getElementById('teleport-btn');
+		
+		const mapBtnEl = document.getElementById('map-btn');
+		var mapOpenedFlag = 'N';
+		var refreshIntervalId;	
+		var secondaryCameraY = 15;
+		const zoomInBtnEl = document.getElementById('zoomIn-btn');
+		const zoomOutBtnEl = document.getElementById('zoomOut-btn');
+
+		var cursorX = -1;
+		var cursorY = -1;
+		var avatarClicked = -1;
+		var pmTarget = '';
+		var rcvPmFrom = '';
+		var countPmContent = 0;
+		var currentPmTarget = '';
+		var currentPmClientId = -1;
+		
+		zoomInBtnEl.addEventListener('click', function() {
+			secondaryCameraY = secondaryCameraY - 1;
+			
+			if (secondaryCameraY < 8) {
+				secondaryCameraY = 8;
+			}
+			//console.log("secondaryCameraY 1: " + secondaryCameraY);
+		});	
+
+		zoomOutBtnEl.addEventListener('click', function() {
+			secondaryCameraY = secondaryCameraY + 1;
+			
+			if (secondaryCameraY > 50) {
+				secondaryCameraY = 50;
+			}
+			//console.log("secondaryCameraY 2: " + secondaryCameraY);
+		});	
+
+		function setAvatar(params) {				
+			console.log('setAvatar()');		
+			var corpid = params.corpid;
+			$.ajax({
+				url: "https://160.1.42.191:9876/users/corp/" + corpid,
+				type: "GET",
+				success: function(d) {
+					playerInfo.corpid = d.corpid;
+					playerInfo.nickname = d.nickname;
+					playerInfo.photo = d.photo;
+					playerInfo.avatar = d.avatar;
+
+					var p = document.getElementById('player');
+					p.setAttribute('networked', 'template:#'+playerInfo.corpid+'-avatar-template;attachTemplateToLocal:false;');
+					
+					var c = document.getElementById('corp');
+					c.setAttribute('text', 'value', playerInfo.corpid);
+
+					var n = document.getElementById('nametag');
+					n.setAttribute('text', 'value', playerInfo.nickname);	
+					
+					var nb = document.getElementById('nametagBack');
+					nb.setAttribute('text', 'value', playerInfo.nickname);	
+					
+					var l = document.getElementById('localAvatar');
+					l.setAttribute('gltf-model', 'glb/' + playerInfo.avatar);	
+					
+					p.setAttribute('corpid', playerInfo.corpid);
+					p.setAttribute('display_name', playerInfo.nickname);
+				}
+			});
+							
+		}
+
+		function genClientId() {
+			let num = '';
+			for (let i = 0; i < 16; i++) {
+				num += Math.floor(Math.random() * 10).toString();
+			}
+			return num;
+		}
+
+		function getUserCorpId() {
+			var p = document.getElementById('player');
+			return p.getAttribute('corpid');
+		}
+
+		function getUserDisplayName() {
+			var p = document.getElementById('player');
+			return p.getAttribute('display_name');
+		}
+		
+		function getMeetingRoom() {
+			var r = document.getElementById('meetingroom_div');
+			return r.getAttribute('room_id');
+		}
+
+		function setVolLED(vol, senderId) {
+			let user_div = document.getElementById(senderId + "_vol");
+			let user_leds = Array.from(user_div.children);			
+			let range = user_leds.slice(0, Math.round(vol/10));
+
+			for (var i = 0; i < user_leds.length; i++) {
+				user_leds[i].style.boxShadow = "-2px -2px 4px 0px #a7a7a73d inset, 2px 2px 4px 0px #0a0a0e5e inset";
+			}
+			for (var i = 0; i < range.length; i++) {
+				range[i].style.boxShadow = `5px 2px 5px 0px #0a0a0e5e inset, -2px -2px 1px 0px #a7a7a73d inset, -2px -2px 6px 0px ${ledColor[i]} inset`;			
+			}
+		}
+
+		function getUrlParams() {
+    		var match;
+    		var pl = /\+/g;  // Regex for replacing addition symbol with a space
+    		var search = /([^&=]+)=?([^&]*)/g;
+    		var decode = function (s) { return decodeURIComponent(s.replace(pl, ' ')); };
+    		var query = window.location.search.substring(1);
+    		var urlParams = {};
+
+    		match = search.exec(query);
+    		while (match) {
+	      		urlParams[decode(match[1])] = decode(match[2]);
+      			match = search.exec(query);
+    		}
+			return urlParams;
+		}
+
+		function setParticipant(clientId, photoName, addListener) {
+			var participant_div = document.getElementById('participantUI');
+			var me = document.createElement('div');
+			me.setAttribute('id', clientId + "_user");
+			participant_div.append(me);
+			var myName = document.createElement('div');			
+			myName.setAttribute('id', clientId + '_name');
+			
+			if(addListener) {
+				myName.innerHTML = "<img id='" + clientId + "_photo' class='participant_photo' src='photo/" + photoName + "' />";
+			} else {
+				myName.innerHTML = "<img id='" + clientId + "_photo' class='my_photo' src='photo/" + photoName + "' />";
+			}
+			
+			me.append(myName);
+			
+			var vol_wrapper = document.createElement('div');
+			vol_wrapper.setAttribute('id', clientId + '_vol');
+			vol_wrapper.setAttribute('class', 'volumen-wrapper');
+			for (let i = 0; i < 10; i++) {
+				var led = document.createElement('div');				
+				led.setAttribute('class', 'led');
+				vol_wrapper.append(led);
+			}
+			me.append(vol_wrapper);
+
+			if(addListener) {
+				myPhoto = document.getElementById(clientId + '_photo');
+				var rect = myPhoto.getBoundingClientRect();
+				
+				myPhoto.addEventListener('click', function(e) {						
+					avatarClicked = clientId;						
+					$('.ava-actions').addClass('show') 
+					$('.ava-actions').css({top: rect.top, left: 50});
+					networkedComponentChild = usersMap[clientId].el.children;
+					for (let i = 0; i < networkedComponentChild.length; i++) {									
+						if (networkedComponentChild[i].className === "nametag") {						
+							pmTarget = networkedComponentChild[i].getAttribute('text').value;															
+						}
+					}						
+				});
+			}
+		}
+		
+		function removeParticipant(clientId) {
+			var participant_div = document.getElementById('participantUI');
+			var c = document.getElementById(clientId + "_user");
+			participant_div.removeChild(c);
+		}
+
+		function getAudioVol() {
+			console.log("Start getting audio volume...");
+			navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+			
+			if (navigator.getUserMedia) {
+				navigator.getUserMedia({
+					audio: true
+				},
+				function(stream) {
+					audioContext = new AudioContext();
+					analyser = audioContext.createAnalyser();
+					mic = audioContext.createMediaStreamSource(stream);
+					processor = audioContext.createScriptProcessor(2048, 1, 1);
+					
+					analyser.smoothingTimeConstant = 0.8;
+					analyser.fftSize = 1024;
+					
+					mic.connect(analyser);
+					analyser.connect(processor);
+					processor.connect(audioContext.destination);
+					
+					processor.onaudioprocess = function() {
+						var array = new Uint8Array(analyser.frequencyBinCount);
+						analyser.getByteFrequencyData(array);
+						var values = 0;
+
+						var length = array.length;
+						for (var i = 0; i < length; i++) {
+							values += (array[i]);
+						}
+
+						var average = values / length;				
+						if (state.audioEnabled) {
+							setVolLED(average, NAF.clientId); //To update the volume leds
+							if (average >= 30 || average < 10) { //If network traffic too much, can add the if block back so that broadcast at a certain level of volume								
+								NAF.connection.adapter.broadcastData("talking", {muteStatus: false, vol: average, sender: getUserCorpId(), senderId: NAF.clientId});							
+							} 
+						}						
+					}
+				},
+				function(err) {
+					console.log("Got error:", err.name);
+				});	
+			} else {
+				console.log("getUserMedia not supported");
+			}
+		}
+
+		function setup(params) {
+			var roomid = params.room.split('|')[0];
+			var roomname = params.room.split('|')[1];	
+
+			var m = document.getElementById('meetingroom_div');	
+			m.setAttribute('room_id', roomid);
+			m.setAttribute('room_name', roomname);
+	
+			//var corpid = params.corpid;
+			//var username = params.username;
+
+			//Get the meeting attendees and generate the template schema
+			var assets = document.getElementById('a-assets');
+			var temp_div = document.getElementById('template_div');
+			$.ajax({
+        		url: "https://160.1.42.191:9876/meetings/" + roomid,
+        		type: "GET",
+        		success: function(data) {		  					
+					attend = data.attendees;
+					console.log(attend);
+					attend.forEach(function(a) {	
+						$.ajax({
+							url: "https://160.1.42.191:9876/users/corp/" + a.corpid,
+							type: "GET",
+							success: function(d) {								
+								console.log(d);																
+								var template_string = "";
+								template_string += "<template id='" + d.corpid + "-avatar-template'>";
+								template_string += "<a-entity class='avatar'>";						
+								//CORP ID
+								template_string += "<a-entity id='corp' class='corp' text='value:" + d.corpid + ";' visible='false'></a-entity>"
+								//Voice
+								template_string += "<a-entity id='voice' class='voice' networked-audio-source></a-entity>";
+								//Name
+								template_string += "<a-entity id='nametag' class='nametag' text='value:" + d.nickname + ";align:center;' position='0 3.5 0' rotation='0 180 0' scale='3 3 3'></a-entity>";
+								template_string += "<a-entity id='nametagBack' class='nametagBack' text='value:" + d.nickname + ";align:center;' position='0 3.5 0' rotation='0 0 0' scale='3 3 3'></a-entity>";
+								//Photo
+								template_string += "<a-entity id='photo' class='photo' text='value:" + d.photo + "'></a-entity>";
+								//Head
+								template_string += "<a-entity id='head' class='head raycastable' gltf-model='glb/" + d.avatar + "' position='0 0 0' rotation='0 180 0' scale='1.6 1.6 1.6'></a-entity>";
+								template_string += "</a-entity>";
+								template_string += "</template>";
+								
+								temp_div.innerHTML += template_string;
+
+								NAF.schemas.add({
+									template: '#' + d.corpid + '-avatar-template',
+									components: [
+										'position',
+										'rotation',
+										'animation-mixer',
+										{
+											selector: '.head',
+											component: 'material',
+											property: 'color'
+										},
+										{
+											selector: '.nametag',
+											component: 'text',
+											property: 'value'
+										},
+										{
+											selector: '.nametagBack',
+											component: 'text',
+											property: 'value'
+										},
+										{
+											selector: '.photo',
+											component: 'text',
+											property: 'value'
+										}
+									]
+								});
+							}
+						});									
+					});					  
+				}				    	
+   			});	
+		}
+
+		function setPM(targetName, targetId) {
+			currentPmTarget = targetName;
+			currentPmClientId = targetId;
+			var t = document.getElementById('pm-target');
+			t.textContent = 'Private Message to: ' + currentPmTarget;
+			if (!pmMap[avatarClicked]) {
+				countPmContent++;
+				pmMap[avatarClicked] = {
+					name: pmTarget,
+					msg: ''
+				};					
+			} else {
+				var pmMessageInput = document.getElementById("pm-message-input");					
+				var pmMessages = document.getElementById("pm-messages");
+				if (avatarClicked === currentPmClientId) {
+					pmMessageInput.focus;
+					pmMessages.innerHTML = pmMap[currentPmClientId].msg
+				}
+			}
+			$('.pm-div').addClass('show');
+		}
+
+		function teleportTo(position) {
+			var p = document.getElementById('player');
+			console.log(p.getAttribute('position'));
+			//parameter position should be in the format '0 0 0'
+			p.setAttribute('position', position);
+			console.log(p.getAttribute('position'));
+		}
+
+		document.addEventListener('DOMContentLoaded', () => {
+			console.log('DOMContentLoaded');			
+			//console.log(params);			
+			setup(params);
+			setAvatar(params);
+			
+			const stopAndRemoveVideoTrack = async () => {				
+				const videoTracks = state.currentStream.getVideoTracks();
+				if (videoTracks.length > 0) {
+					videoTracks[0].stop();
+					state.currentStream.removeTrack(videoTracks[0]);
+					await NAF.connection.adapter.setLocalMediaStream(state.currentStream);
+				}				
+			};
+
+			//Handle sending chat text
+			sendTextBtnEl.addEventListener('click', function() {
+				var messageInput = document.getElementById("message-input");
+				var chatMessages = document.getElementById("chat-messages");
+				chatMessages.innerHTML += '<p style="color:black"> ' + getUserDisplayName() + ": " + messageInput.value + '</p>';
+				chatMessages.scrollTop = chatMessages.scrollHeight;				
+				NAF.connection.adapter.broadcastData("chat", {txt: messageInput.value, sender: getUserDisplayName(), senderId: NAF.clientId});
+				messageInput.value = "";
+			});
+
+			//Handle to mute or un-mute
+			audioBtnEl.addEventListener('click', function() {
+				var participantName = document.getElementById(NAF.clientId + "_name");
+				NAF.connection.adapter.enableMicrophone(!state.audioEnabled);
+				if (state.audioEnabled) {										
+					audioBtnEl.textContent = 'Un-Mute';
+					var mute = document.createElement('img');
+					mute.setAttribute('id', NAF.clientId + '_mute_icon');
+					mute.setAttribute('width', 16);
+					mute.setAttribute('height', 16);
+					mute.setAttribute('src', 'images/mute.png');
+					participantName.appendChild(mute);
+					NAF.connection.adapter.broadcastData("talking", {muteStatus: true, vol: 0, sender: getUserCorpId(), senderId: NAF.clientId});
+					setVolLED(0, NAF.clientId);					
+				} else {					
+					audioBtnEl.textContent = 'Mute';
+					var mute_icon = document.getElementById(NAF.clientId + "_mute_icon");
+					participantName.removeChild(mute_icon);					
+				}	
+				state.audioEnabled = !state.audioEnabled;			
+			});
+
+			// Handle camera button click (Show and Hide)
+			cameraBtnEl.addEventListener('click', async () => {
+				if (state.cameraEnabled) {
+					await stopAndRemoveVideoTrack();
+					var camEl = document.querySelector('.share_screen');
+					if (camEl != undefined) {
+						scene.removeChild(camEl);
+					}					
+				} else {
+					const stream = await navigator.mediaDevices.getUserMedia(
+						{video: {mediaSource: "camera",
+							width: {max: 1280, ideal: 640},
+							height: {ideal: 360},
+							frameRate: 30}});					
+					state.currentStream.addTrack(stream.getVideoTracks()[0]);
+					await NAF.connection.adapter.setLocalMediaStream(state.currentStream);
+					
+					var el = document.createElement('a-entity');
+					el.setAttribute('class', 'scr');
+					el.setAttribute('networked', 'template:#share-screen-template');					
+					scene.appendChild(el);
+				}			
+				screenBtnEl.disabled = !state.cameraEnabled;
+				state.cameraEnabled = !state.cameraEnabled;
+				cameraBtnEl.textContent = state.cameraEnabled ? 'Hide Camera' : 'Show Camera';				
+				NAF.connection.adapter.broadcastData("streaming", {camStatus: state.cameraEnabled, screenStatus: state.screenEnabled, sender: getUserCorpId(), senderId: NAF.clientId});
+			});
+
+			screenBtnEl.addEventListener('click', async () => {
+				if (state.screenEnabled) {
+					await stopAndRemoveVideoTrack();
+					var screenEl = document.querySelector('.share_screen');
+					if (screenEl != undefined) {
+						scene.removeChild(screenEl);
+					}
+				} else {
+					navigator.mediaDevices.getDisplayMedia({video: true}).then((stream) => {						
+						state.currentStream.addTrack(stream.getVideoTracks()[0]);
+						NAF.connection.adapter.setLocalMediaStream(state.currentStream);
+					});
+										
+					var el = document.createElement('a-entity');
+					el.setAttribute('class', 'scr');
+					el.setAttribute('networked', 'template:#share-screen-template');	
+					scene.appendChild(el);
+				}
+				cameraBtnEl.disabled = !state.screenEnabled;
+				state.screenEnabled = !state.screenEnabled;
+				screenBtnEl.textContent = state.screenEnabled ? 'Stop Screen Share' : 'Start Screen Share';
+				NAF.connection.adapter.broadcastData("streaming", {camStatus: state.cameraEnabled, screenStatus: state.screenEnabled, sender: getUserCorpId(), senderId: NAF.clientId});
+			});
+			
+			scene.addEventListener('adapter-ready', ({ detail: adapter }) => {
+				// We don't use the syncOccupants API, set requestedOccupants to be the same array instance as availableOccupants				
+				adapter.requestedOccupants = adapter.availableOccupants;
+				const clientId = genClientId(); // generate a random 16 characters string, but you can use a uuid4 for example
+				adapter.setClientId(clientId);				
+				navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+					adapter.setLocalMediaStream(stream).then(() => {
+						// Note that networked-scene audio:true option has no effect with the janus adapter
+						adapter.enableMicrophone(true); // set it to false if you want to be muted initially.
+						state.currentStream = stream;
+						adapter.setLocalMediaStream(stream);
+						getAudioVol();
+					});
+				}).catch(err => {
+					console.warn("Microphone access not allowed. This client will not broadcast audio.");
+				});
+			});
+		});
+
+		// Fired when a networked entity is created 
+		document.body.addEventListener("entityCreated", function(evt) {			
+			const networkedComponent = evt.detail.el.getAttribute("networked");			
+			var networkedComponentChild = evt.detail.el.children;
+			usersMap[networkedComponent.creator] = {
+				networkId: networkedComponent.networkId,
+				el: evt.detail.el
+			};
+						
+			if (networkedComponent.creator !== "") {			
+				if (networkedComponent.template.indexOf('avatar') >= 0) {					
+					var avatar_div = document.getElementById('naf-' + networkedComponent.networkId);					
+					avatar_div.setAttribute('clientId', networkedComponent.creator);
+					avatar_div.setAttribute('networkId', networkedComponent.networkId);					
+					avatar_div.addEventListener('click', function(e) {	
+						avatarClicked = networkedComponent.creator;											
+						
+						$('.ava-actions').addClass('show') 
+						$('.ava-actions').css({top: cursorY, left: cursorX});
+						for (let i = 0; i < networkedComponentChild.length; i++) {									
+							if (networkedComponentChild[i].className === "nametag") {						
+								pmTarget = networkedComponentChild[i].getAttribute('text').value;								
+							}
+						}						
+					});
+				}
+
+				for (let i = 0; i < networkedComponentChild.length; i++) {					
+					if (networkedComponentChild[i].className === "photo") {						
+						setParticipant(networkedComponent.creator, networkedComponentChild[i].getAttribute("text").value, true);
+					}
+				}
+			}
+		});
+
+		// Fired when another client disconnects from you   
+		document.body.addEventListener("clientDisconnected", function(evt) {
+			if (usersMap[evt.detail.clientId]) {
+				delete usersMap[evt.detail.clientId];
+				removeParticipant(evt.detail.clientId);
+			}		
+		});		
+
+		function onConnect() {			
+			//addSchema();			
+			console.log("onConnect", new Date());
+			console.log("Client ID: " + NAF.clientId);		
+			var naf_adapter = NAF.connection.adapter;
+			console.log("NAF Adapter: ", naf_adapter);	
+			//setParticipant(NAF.clientId, getUserCorpId(), false);
+			setParticipant(NAF.clientId, playerInfo.photo, false);
+
+			//Set player animation
+			var player = document.getElementById('player');
+			
+			wavingBtnEl.addEventListener('click', function() {
+			player.setAttribute('animation-mixer', 'clip', 'waving');
+				setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+			});
+
+			shakeHandBtnEl.addEventListener('click', function() {
+			player.setAttribute('animation-mixer', 'clip', 'shakinghand');
+				setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+			});
+
+			raiseHandBtnEl.addEventListener('click', function() {
+			player.setAttribute('animation-mixer', 'clip', 'handraising');
+				setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+			});
+
+			sitBtnEl.addEventListener('click', function() {
+				if (state.stand == true) {
+					player.setAttribute('animation-mixer', 'clip', 'sittingidle');
+					state.stand = false;
+					sitBtnEl.textContent = "Stand";
+				} else {
+					player.setAttribute('animation-mixer', 'clip', 'idle');
+					state.stand = true;
+					sitBtnEl.textContent = "Sit";
+				}
+			});
+
+			//PM Message
+			pmBtnEl.addEventListener('click', function() {																
+				setPM(pmTarget, avatarClicked);				
+			});
+
+			teleportBtnEl.addEventListener('click', function(e) {				
+				var target = document.getElementById('naf-' + usersMap[avatarClicked].networkId);
+				console.log(target);
+				console.log(target.getAttribute('position'));
+				console.log(target.getAttribute('rotation'));
+
+				var pos = target.getAttribute('position');
+
+				//me.setAttribute('look-at', '#naf-' + usersMap[avatarClicked].networkId);
+				var newX = pos.x + 3;
+				var newY = pos.y;
+				var newZ = pos.z + 3;
+				teleportTo(newX+' '+newY+' '+newZ);
+				
+				
+			});
+			
+			closePmBtnEl.addEventListener('click', function() {						
+				var pmMessageInput = document.getElementById("pm-message-input");
+				var pmMessages = document.getElementById("pm-messages");
+				pmMessageInput.value = "";
+				pmMessages.innerHTML = "";
+				$('.pm-div').removeClass('show');
+			});
+
+			sendPmTextBtnEl.addEventListener('click', function() {				
+				var pmMessageInput = document.getElementById("pm-message-input");
+				var pmMessages = document.getElementById("pm-messages");
+				pmMessages.innerHTML += '<p style="color:black"> ' + getUserDisplayName() + ": " + pmMessageInput.value + '</p>';
+				pmMessages.scrollTop = pmMessages.scrollHeight;				
+				NAF.connection.adapter.reliableTransport = "websocket";
+				NAF.connection.adapter.sendDataGuaranteed(currentPmClientId, "pm", {msg: pmMessageInput.value, sender: getUserDisplayName(), senderId: NAF.clientId});							
+				pmMap[currentPmClientId].msg = pmMessages.innerHTML;				
+				pmMessageInput.value = "";
+			});	
+
+			document.getElementById("spectatorDiv").style.display = "none";
+			mapBtnEl.addEventListener('click', function() {
+				
+				if (mapOpenedFlag == 'N' ) {
+					var playerAvatar = document.getElementById('player');
+					var secondaryCamera = document.getElementById('secondaryCamera');
+					refreshIntervalId = setInterval(function () { 
+											var playerAvatarPosition = playerAvatar.getAttribute('position');
+											//console.log("playerAvatarPosition: ", playerAvatarPosition);
+											secondaryCamera.setAttribute('position', playerAvatarPosition.x + ' ' + secondaryCameraY + ' ' + playerAvatarPosition.z);
+											//console.log("secondaryCamera: ", secondaryCamera.getAttribute('position'));
+										}, 10);
+					document.getElementById("spectatorDiv").style.display = "";
+					document.getElementById("spectatorDiv").style.opacity = "1";
+					mapOpenedFlag = 'Y';
+				} else if (mapOpenedFlag == 'Y' ) {
+					clearInterval(refreshIntervalId);
+					document.getElementById("spectatorDiv").style.display = "none";
+					mapOpenedFlag = 'N';
+				}
+					
+			});
+
+			document.addEventListener('keydown', function(evt) {
+				if (evt.keyCode === 87 || evt.keyCode === 65 || evt.keyCode === 83 || evt.keyCode === 68 || evt.keyCode ===38 || evt.keyCode === 37 || evt.keyCode === 39 || evt.keyCode === 40) {
+					player.setAttribute('animation-mixer', 'clip', 'walking');
+				}
+			});
+			
+			document.addEventListener('keyup', function(evt) {
+				if (evt.keyCode === 87 || evt.keyCode === 65 || evt.keyCode === 83 || evt.keyCode === 68 || evt.keyCode ===38 || evt.keyCode === 37 || evt.keyCode === 39 || evt.keyCode === 40) {
+					player.setAttribute('animation-mixer', 'clip', 'idle');
+				}
+			});
+			//End set player animation
+
+			NAF.connection.subscribeToDataChannel("talking", (senderId, dataType, data, targetId) =>{				
+				if (usersMap[data.senderId]) {
+					var senderEl = document.getElementById(data.senderId + "_name");
+					var mute_icon = document.getElementById(data.senderId + "_mute_icon");
+					setVolLED(data.vol, data.senderId);
+					if (data.muteStatus) {
+						if (mute_icon == undefined) {
+							var mute = document.createElement('img');
+							mute.setAttribute('id', data.senderId + '_mute_icon');
+							mute.setAttribute('width', 16);
+							mute.setAttribute('height', 16);
+							mute.setAttribute('src', 'images/mute.png');					
+							senderEl.appendChild(mute);
+						}
+					} else {
+						if (mute_icon != undefined) {
+							senderEl.removeChild(mute_icon);						
+						}
+					}										
+				}				
+			});
+
+			NAF.connection.subscribeToDataChannel("streaming", (senderId, dataType, data, targetId) => {
+				//data.camStatus = true --> disable the camera-btn
+				//data.screenStatus = true --> disable the screen-btn		
+				console.log("camStatus: ", data.camStatus);
+				console.log("screenStatus: ", data.screenStatus);
+				if (data.camStatus || data.screenStatus) {
+					cameraBtnEl.disabled = true;			
+					screenBtnEl.disabled = true;
+				} else {
+					cameraBtnEl.disabled = false;			
+					screenBtnEl.disabled = false;
+				}
+				
+			});
+
+			NAF.connection.subscribeToDataChannel("chat", (senderId, dataType, data, targetId) => {
+				var messageInput = document.getElementById("message-input");
+				var chatMessages = document.getElementById("chat-messages");
+				chatMessages.innerHTML += '<p style="color:blue"> ' + data.sender + ": " + data.txt + '</p>';
+				chatMessages.scrollTop = chatMessages.scrollHeight;				
+			});
+
+			NAF.connection.subscribeToDataChannel("pm", (senderId, dataType, data, targetId) => {				
+				console.log("data: ", data);	
+				console.log(pmMap);
+				if (!pmMap[data.senderId]) {
+					countPmContent++;
+					pmMap[data.senderId] = {
+						name: data.sender,
+						msg: ''
+					};					
+				} 
+							
+				if (currentPmTarget === '' || currentPmTarget === data.sender) {
+					currentPmTarget = data.sender;
+					currentPmClientId = data.senderId;
+					
+					var t = document.getElementById('pm-target');					
+					t.textContent = 'Private Message to : ' + data.sender;	
+						
+					var pmMessageInput = document.getElementById("pm-message-input");
+					var pmMessages = document.getElementById("pm-messages");
+					pmMessages.innerHTML = pmMap[data.senderId].msg;
+					pmMessages.innerHTML += '<p style="color:blue"> ' + data.sender + ": " + data.msg + '</p>';
+					pmMessages.scrollTop = pmMessages.scrollHeight;						
+					
+					pmMap[data.senderId].msg = pmMessages.innerHTML;
+				} else {
+					var target_div = document.getElementById(data.senderId + "_name");
+					var new_msg = document.createElement('img');
+					new_msg.setAttribute('id', data.senderId + '_msg');
+					new_msg.setAttribute('src', 'images/new_msg.png');
+					new_msg.setAttribute('width', 32);
+					new_msg.setAttribute('height', 32);
+					target_div.appendChild(new_msg);
+					pmMap[data.senderId].msg += '<p style="color:blue"> ' + data.sender + ": " + data.msg + '</p>';
+					new_msg.addEventListener('click', function() {
+						avatarClicked = data.senderId;
+						pmTarget = data.sender;
+						setPM(pmTarget, avatarClicked);
+						target_div.removeChild(new_msg);
+					});					
+				}
+				
+				$('.pm-div').addClass('show');
+
+			});
+		}				
+
+		$(window).on('click', e => {			
+			const target = e.target
+			//console.log('click');
+			console.log(target);
+			if (target.matches('.a-mouse-cursor-hover')) {
+				//When click on the avatar, there would be 3 events
+				//First event is from a-scene
+				//Then from the avatar which the class=head
+				//Last from canvas with class a-canvas, a-grab-cursor and a-mouse-cursor-hover
+				//Seems the a-mouse-cursor-hover only exists when click the avatar
+				//To remove the 'show' class on the avatar actions, ignore the a-mouse-cursor-hover event
+				return;
+			}  							
+			
+			if (!target.matches('.head') && !target.matches('.participant_photo')) {
+				if ($('.ava-actions').hasClass('show')) {
+					$('.ava-actions').removeClass('show')
+				}				
+			}
+
+			if (target.matches('.greetings-btn')) { 
+    			return $('.g-btn').toggleClass('show');
+			}			 
+  
+  			if (!target.matches('[data-inside]')) { 
+    			$('.g-btn').removeClass('show');
+			}
+		});
+
+		$(window).on('mousedown', e => {
+			if (e.pageX != 'undefined' || e.clientX != 'undefined') {
+				if (e.pageX == null && e.clientX != null) {
+					cursorX = e.clientX;
+					cursorY = e.clientY;
+				} else if (e.pageX != null) {
+					cursorX = e.pageX;
+					cursorY = e.pageY;
+				}
+			}			  
+		});
+		
+	</script>
+  </body>
+</html>

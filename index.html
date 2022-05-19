@@ -1,0 +1,55 @@
+<html>
+  <head>     
+		<script src="scripts/jquery/jquery-3.6.0.min.js"></script>   
+  </head>
+  <body onload=getMeetings()>
+    <div class="login-page">
+      <div class="form">
+        <h2>Enter room details</h2>        
+        <form class="login-form"></form>          
+          <input type="text" id="corpid" name="corpid" placeholder="CORP ID" required/>
+          <input type="password" id="password" name="password" placeholder="Password" required/>
+          <select id="room" name="room"></select>
+          <button onclick=submitForm()>Join room</button>
+        </form>
+      </div>
+    </div>
+  </body>
+  <script>
+    function getMeetings() {
+      $.ajax({
+        url: "https://160.1.42.191:9876/meetings",
+        type: 'GET',
+        success: function(res) {
+          let s = document.getElementById('room');
+          res.forEach(function(r) {            
+            let v = r.id + "|" + r.roomid;
+            let o = document.createElement('option');
+            o.value = v;
+            o.appendChild(document.createTextNode(r.roomid));
+            s.appendChild(o);;
+          });
+        }
+      });
+    }
+
+    function submitForm() {
+      var roomId = document.getElementById('room').value;
+      var corpId = document.getElementById('corpid').value;
+      var pw = document.getElementById('password').value;
+      var dataString = JSON.stringify({'room': roomId, 'corpid': corpId, 'password': pw});      
+      $.ajax({
+        url: "https://160.1.42.191:9876/auth/ldap",
+        type: "POST",
+        data: dataString,
+        contentType: 'application/json',
+        success: function(data) {          
+          var dataObj = JSON.parse(data);          
+          //window.location.href ="/aframe.html?room="+roomId+"&corpid="+corpId+"&username="+encodeURIComponent(dataObj.displayName);
+          //When create account for new user, there is a field "nickname" which stored in MongoDB, avatar will use the nickname to display
+          window.location.href ="/aframe.html?room="+roomId+"&corpid="+corpId;
+        }
+      });
+    }
+  </script>
+</html>

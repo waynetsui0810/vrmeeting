@@ -1,0 +1,92 @@
+.ava-actions {
+  position: absolute;
+  display: none;
+  z-index: 10;	
+}
+#participantUI {
+  top: 220px;
+  width: 100px;
+  height: 160px;
+  position: fixed;
+  z-index: 10;				
+}
+.actions {
+  position: absolute;
+  display: flex;
+  bottom: 3%;
+  left: 3%;
+}
+.pm-div {
+  position: absolute;
+  width: 300px;
+  height: 400px;
+  display: none;
+  background-color: whitesmoke;  
+  opacity: 0.6;
+  right: 1%;
+  top: 1%;
+}
+.button {
+  cursor: pointer;
+  background: #fff;
+  height: 40px;
+  width: 130px;
+  border-radius: 30px;
+  margin-right: 10px;
+}
+.controls {
+  position: absolute;
+  width: 100%;
+  display: flex;
+  flex: 1;
+  justify-content: center;
+  flex-direction: row;
+  top: 0;
+}
+.controls p {
+  font-family: monospace;
+  color: white;
+}
+#chatUI {
+  width: 250px;
+  height: 200px;
+  position: fixed;
+  z-index: 10;
+  background-color: whitesmoke;
+  opacity: 0.6;
+}
+.chatMessage {
+  width: 250px;
+  height: 180px;
+  overflow: auto;
+}
+.volumen-wrapper {
+  display: flex;
+  flex-direction: row;  
+  align-items: center;
+}
+.led {				
+  height: 6px;
+  width: 8px;
+  background-color: #292a38;
+  box-shadow: -2px -2px 4px 0px #a7a7a73d inset, 2px 2px 4px 0px #0a0a0e5e inset;
+  margin: 0 1px;
+}
+.g-btn {
+  display: none;
+}
+.show {
+  display: block;
+}
+.ava-btn {
+  display: none;
+}
+#spectatorDiv {
+  width: 400px;
+  height: 300px;
+  position: fixed;
+  z-index: 10;
+  background-color: whitesmoke;
+  right: 1%;
+  top: 1%;
+}
