@@ -10,12 +10,13 @@
 	    <!--<a-scene embedded arjs="sourceWidth:1280; sourceHeight:960; displayWidth:1280; displayHeight:960;">-->
 		<a-scene embedded arjs="sourceWidth:1920; sourceHeight:1080; displayWidth:1920; displayHeight:1080;">
 			<a-marker preset="hiro" smooth="true">
+				<!--<a-entity geometry="primitive:plane" material="color:green" text="value: This is a HA logo; color: blue;height:3;width:3;align:center" position="0 0 -1" rotation="0 0 0"></a-entity>-->
 				<a-entity
 					position="0 0 0"
 					scale="1.2 1.2 1.2"
-					gltf-model="glb/tkw532.gltf"
+					gltf-model="glb/books.glb"
 					animation="property: rotation; to: 0 360 0; loop: true; dur: 10000"	
-					animation-mixer="clip:sittingidle;"	  
+					animation-mixer="clip:sittingidle;"	 
 				></a-entity>
 			</a-marker>
 		
@@ -26,7 +27,47 @@
 					scale="0.1 0.1 0.1"
 					gltf-model="glb/flower.glb"
 				></a-entity>-->
-				<a-entity geometry="primitive:plane" material="color:green" text="value: This is a HA logo; color: blue;height:3;width:3;align:center" position="0 0 -1" rotation="0 0 0"></a-entity>
+				<a-entity geometry="primitive:plane" material="color:green" text="value: This is a HA logo; color: blue;height:3;width:3;align:center" position="0 0 0" rotation="0 0 0"></a-entity>
+			</a-marker>
+
+			<a-marker type="pattern" preset="custom" url="marker/pattern-Captain_America.patt">
+				<!--<a-entity
+					position="0 0 0"
+					rotation="-90 0 0"
+					scale="0.1 0.1 0.1"
+					gltf-model="glb/flower.glb"
+				></a-entity>-->
+				<a-entity geometry="primitive:plane" material="color:green" text="value: Captain America; color: blue;height:3;width:3;align:center" position="0 0 0" rotation="0 0 0"></a-entity>
+			</a-marker>
+
+			<a-marker type="pattern" preset="custom" url="marker/pattern-Ironman.patt">
+				<!--<a-entity
+					position="0 0 0"
+					rotation="-90 0 0"
+					scale="0.1 0.1 0.1"
+					gltf-model="glb/flower.glb"
+				></a-entity>-->
+				<a-entity geometry="primitive:plane" material="color:green" text="value: Ironman; color: blue;height:3;width:3;align:center" position="0 0 0" rotation="0 0 0"></a-entity>
+			</a-marker>
+
+			<a-marker type="pattern" preset="custom" url="marker/pattern-Captain_Marvel.patt">
+				<!--<a-entity
+					position="0 0 0"
+					rotation="-90 0 0"
+					scale="0.1 0.1 0.1"
+					gltf-model="glb/flower.glb"
+				></a-entity>-->
+				<a-entity geometry="primitive:plane" material="color:green" text="value: Captain Marvel; color: blue;height:3;width:3;align:center" position="0 0 0" rotation="0 0 0"></a-entity>
+			</a-marker>
+
+			<a-marker type="pattern" preset="custom" url="marker/pattern-Spiderman.patt">
+				<!--<a-entity
+					position="0 0 0"
+					rotation="-90 0 0"
+					scale="0.1 0.1 0.1"
+					gltf-model="glb/flower.glb"
+				></a-entity>-->
+				<a-entity geometry="primitive:plane" material="color:green" text="value: Spiderman; color: blue;height:3;width:3;align:center" position="0 0 0" rotation="0 0 0"></a-entity>
 			</a-marker>
 
 			<a-entity camera></a-entity>
