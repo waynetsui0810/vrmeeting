@@ -1,10 +1,88 @@
+#chatUI {
+  width: 350px;
+  height: 350px;
+  position: fixed;
+  display: block;
+  z-index: 10;
+  background-color: whitesmoke;
+  opacity: 0.6;
+}
+.chatTab {
+  overflow: hidden;
+  position: absolute;
+  z-index: 10;
+  border: 1px solid #ccc;
+  background-color: #f1f1f1;
+}
+.chatTab button {
+  background-color: inherit;
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 14px 16px;
+  transition: 0.3s;
+  z-index: 10;
+}
+.chatTab button:hover {
+  background-color: #ddd;
+  z-index: 10;
+}
+.chatTab button.active {
+  background-color: #ccc;
+  z-index: 10;
+}
+.chatTabContent {
+  display: none;
+  padding: 6px 12px;
+  border: 1px solid #ccc;
+  border-top: none;
+  z-index: 10;
+}
+.pm-div {
+  position: absolute;
+  width: 350px;
+  height: 300px;
+  display: block;
+  z-index: 10;
+  background-color: transparent;  
+  opacity: 0.6;  
+}
+.chat-div {
+  position: absolute;
+  width: 350px;
+  height: 300px;
+  display: block;
+  z-index: 10;
+  background-color: transparent;  
+  opacity: 0.6;  
+}
+.chatMessage {
+  width: 300px;
+  height: 230px;
+  overflow: auto;
+  z-index: 10;
+}
+.pm-messages {
+  width: 300px;
+  height: 230px;
+  overflow: auto;
+  z-index: 10;
+}
+
 .ava-actions {
   position: absolute;
   display: none;
   z-index: 10;	
 }
+.chair-actions {
+  position: absolute;
+  display: none;
+  z-index: 10;	
+  border-style: solid;
+}
 #participantUI {
-  top: 220px;
+  top: 360px;
   width: 100px;
   height: 160px;
   position: fixed;
@@ -16,13 +94,12 @@
   bottom: 3%;
   left: 3%;
 }
-.pm-div {
-  position: absolute;
-  width: 300px;
-  height: 400px;
-  display: none;
+#spectatorDiv {
+  width: 400px;
+  height: 300px;
+  position: fixed;
+  z-index: 10;
   background-color: whitesmoke;  
-  opacity: 0.6;
   right: 1%;
   top: 1%;
 }
@@ -47,19 +124,7 @@
   font-family: monospace;
   color: white;
 }
-#chatUI {
-  width: 250px;
-  height: 200px;
-  position: fixed;
-  z-index: 10;
-  background-color: whitesmoke;
-  opacity: 0.6;
-}
-.chatMessage {
-  width: 250px;
-  height: 180px;
-  overflow: auto;
-}
+
 .volumen-wrapper {
   display: flex;
   flex-direction: row;  
@@ -81,12 +146,4 @@
 .ava-btn {
   display: none;
 }
-#spectatorDiv {
-  width: 400px;
-  height: 300px;
-  position: fixed;
-  z-index: 10;
-  background-color: whitesmoke;
-  right: 1%;
-  top: 1%;
-}
+
