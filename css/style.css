@@ -1,8 +1,8 @@
-#chatUI {
+.chatUI {
   width: 350px;
   height: 500px;
   position: fixed;
-  display: block;
+  display: none;
   z-index: 10;
   background-color: whitesmoke;
   right: 1%;
