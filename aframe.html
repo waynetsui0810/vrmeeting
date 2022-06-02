@@ -159,7 +159,8 @@
 		light="defaultLightsEnabled: false"
 		>
 		<a-assets timeout="5000">
-			<video id="demo" src="video/MS_vs_Meta.mp4"></video>			
+			<video id="demo" src="video/MS_vs_Meta.mp4"></video>
+			<!--<video id="viutv" src="https://viu.tv/" crossorigin></video>-->
 			<img id="pink" src="images/1hyyIUi.jpg" crossorigin="anonymous" />
 			<img src="images/floor.png" id="grid" crossorigin="anonymous" />
 			<img src="images/WMNH2OF.jpg" id="chrome" crossorigin="anonymous" />
@@ -214,9 +215,9 @@
 		
 		<a-entity id="player" movement-controls="constrainToNavMesh:true;" position="-14 0 3" animation-mixer="clip:idle;" look-controls>
 			<a-entity id="cam" class="cam" camera position="0 2.6 0"></a-entity>
-			<a-entity id="nametag" class="nametag" text="value: ??; align:center;" position="0 3.5 0.6" rotation="0 180 0" scale="3 3 3">
+			<a-entity id="nametag" class="nametag" text="value: ??; align:center;" position="0 3.1 0.6" rotation="0 180 0" scale="3 3 3">
 			</a-entity>
-			<a-entity id="nametagBack" class="nametagBack" text="value: ??; align:center;" position="0 3.5 0.6" rotation="0 0 0" scale="3 3 3"> 
+			<a-entity id="nametagBack" class="nametagBack" text="value: ??; align:center;" position="0 3.1 0.6" rotation="0 0 0" scale="3 3 3"> 
 			</a-entity>
 			<a-entity id="corp" class="corp">
 			</a-entity>
@@ -284,13 +285,16 @@
 		</a-entity>
 		
 		<!--<a-video class="raycastable" id="demoVideo" src="#demo" width="8" height="4.5" position="-6.5 5 3.5" rotation="0 180 0" video-functions></a-video>-->
-		<!--<a-video class="raycastable" id="viu" crossorigin="*" src="https://viu.tv/ch/99" width="8" height="4.5" position="-20 5 -23" rotation="0 180 0" video-functions></a-video>-->
+		<!--<a-video class="raycastable" id="viu" src="#viutv" width="8" height="4.5" position="-6.5 5 3.5" rotation="0 180 0"></a-video>-->
 
 		<a-entity id="secondaryCamera" position="0 15 0" rotation="-90 0 0">
 			<a-camera spectator="canvas:#spectatorDiv;" active="false" wasd-controls-enabled="false" look-controls-enabled="false">
 			</a-camera>
 		</a-entity>
-		<a-entity light="type: ambient; color: #CCC"></a-entity>
+		<a-entity light="type: ambient; color: #FEFEFE; intensity: 0.8;"></a-entity>
+		<a-light type="directional" intensity="0.8" position="0 0 0" rotation="-90 0 0" target="#directionaltarget">
+    		<a-entity id="directionaltarget" position="0 0 -1"></a-entity>
+		</a-light>
 	</a-scene>
 
 	<div id="chatUI" class="chatUI">
@@ -326,8 +330,8 @@
 		
 		<button id="chat-text-btn" type="button" title="Chat" class="btn btn-primary btn-circle btn-md"><i id="chat-text-icon" class="bi bi-chat-text" style="font-size:2rem;"></i></button>&nbsp;&nbsp;
 
-		<button id="map-btn" type="button" title="Show Map" class="btn btn-primary btn-circle btn-md" onclick="this.blur();"><i class="bi bi-map" style="font-size:2rem;"></i></button>&nbsp;&nbsp;
-		<button id="present-btn" type="button" title="Present Mode" class="btn btn-primary btn-circle btn-md" onclick="this.blur();"><i class="bi bi-person-rolodex" style="font-size:2rem;"></i></button>&nbsp;&nbsp;
+		<button id="map-btn" type="button" title="Show Map" class="btn btn-primary btn-circle btn-md" onclick="this.blur();"><i id="map-icon" class="bi bi-map" style="font-size:2rem;"></i></button>&nbsp;&nbsp;
+		<button id="present-btn" type="button" title="Present Mode" class="btn btn-primary btn-circle btn-md" onclick="this.blur();"><i id="present-icon" class="bi bi-file-easel" style="font-size:2rem;"></i></button>&nbsp;&nbsp;
 
 		<button id="greetings-btn" type="button" title="Greeting" class="btn btn-primary greetings-btn btn-circle btn-md"><i class="fas fa-glass-cheers" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;		
 		<button id="waving-btn" type="button" title="Wave Hand" class="g-btn btn btn-primary btn-circle btn-md"><i class="fas fa-hands-wash" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;
@@ -348,7 +352,12 @@
 		<!--<img id="sitdown-btn" src="images/sit.png" alt="Sit Down" title="Sit Down" width="32" height="32" />-->
 		<button id="sitdown-btn" title="Sit" class="btn btn-primary"><i class="fas fa-chair"></i></button>
 	</div>
-		
+
+	<!--
+	<div id="vittv" class="viutv">
+		<iframe id="viu-frame" class="viu-frame" src="https://viu.tv/ch/99" frameborder="0"></iframe>
+	</div>
+	-->
 	<script>
 		const params = getUrlParams();		
 		const usersMap = {};
@@ -401,6 +410,8 @@
 		state.screenEnabled = false;
 		state.audioEnabled = true;
 		state.stand = true;
+		state.sit = false;
+		state.presentEnabled = false;
 		
 		const ledColor = ["#64ff00", "#64ff00", "#9bff00", "#d4ff00", "#fbff00", "#ffd500", "#ffa600", "#ff5d00", "#ff0800", "#ff0800"];
 		
@@ -445,7 +456,7 @@
 		var currentChair = '';
 		var sitRefreshIntervalId;
 		var chairYAxis = -999999;
-		var sitFlag = "N";
+		//var sitFlag = "N";
 		
 		zoomInBtnEl.addEventListener('click', function() {
 			secondaryCameraY = secondaryCameraY - 1;
@@ -491,7 +502,13 @@
 		
 		function leaveChair() {
 			clearInterval(sitRefreshIntervalId);
-			sitFlag = "N";
+			//sitFlag = "N";
+			state.sit = false;
+			
+			var p = document.getElementById('player');
+			p.setAttribute('animation-mixer', 'clip', 'idle');
+			var c = document.getElementById('cam');
+			c.setAttribute('position', '0 2.6 0');
 			
 			$.each( chairs, function( key, value ) {
 				if (key != "") {
@@ -759,8 +776,8 @@
 								//Voice
 								template_string += "<a-entity id='voice' class='voice' networked-audio-source></a-entity>";
 								//Name
-								template_string += "<a-entity id='nametag' class='nametag' text='value:" + d.nickname + ";align:center;' position='0 3.5 0' rotation='0 180 0' scale='3 3 3'></a-entity>";
-								template_string += "<a-entity id='nametagBack' class='nametagBack' text='value:" + d.nickname + ";align:center;' position='0 3.5 0' rotation='0 0 0' scale='3 3 3'></a-entity>";
+								template_string += "<a-entity id='nametag' class='nametag' text='value:" + d.nickname + ";align:center;' position='0 3.1 0' rotation='0 180 0' scale='3 3 3'></a-entity>";
+								template_string += "<a-entity id='nametagBack' class='nametagBack' text='value:" + d.nickname + ";align:center;' position='0 3.1 0' rotation='0 0 0' scale='3 3 3'></a-entity>";
 								//Photo
 								template_string += "<a-entity id='photo' class='photo' text='value:" + d.photo + "' visible='false'></a-entity>";
 								//Head
@@ -900,7 +917,14 @@
 				}						
 			});
 
-			chatTextBtnEl.addEventListener('click', function() {
+			chatTextBtnEl.addEventListener('click', function() {				
+				if ($('#chat-text-icon').hasClass('bi-chat-text')) {
+					$('#chat-text-icon').removeClass('bi-chat-text');
+					$('#chat-text-icon').addClass('bi-chat-text-fill');
+				} else {
+					$('#chat-text-icon').removeClass('bi-chat-text-fill');
+					$('#chat-text-icon').addClass('bi-chat-text');
+				}
 				$('#chatUI').toggleClass('show');
 			})
 
@@ -1005,9 +1029,7 @@
 
 		// Fired when a networked entity is created 
 		document.body.addEventListener("entityCreated", function(evt) {			
-			const networkedComponent = evt.detail.el.getAttribute("networked");			
-			console.log(evt);
-			console.log(networkedComponent);
+			const networkedComponent = evt.detail.el.getAttribute("networked");						
 			var networkedComponentChild = evt.detail.el.children;
 			usersMap[networkedComponent.creator] = {
 				networkId: networkedComponent.networkId,
@@ -1087,18 +1109,36 @@
 			var player = document.getElementById('player');			
 			
 			wavingBtnEl.addEventListener('click', function() {
-			player.setAttribute('animation-mixer', 'clip', 'waving');
-				setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				player.setAttribute('animation-mixer', 'clip', 'waving');
+				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				//if (sitFlag == "Y") {
+				if (state.sit) {
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 3000);
+				} else {				
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				}
 			});
 
 			shakeHandBtnEl.addEventListener('click', function() {
-			player.setAttribute('animation-mixer', 'clip', 'shakinghand');
-				setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				player.setAttribute('animation-mixer', 'clip', 'shakinghand');
+				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				//if (sitFlag == "Y") {
+				if (state.sit) {
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 3000);
+				} else {				
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				}
 			});
 
 			raiseHandBtnEl.addEventListener('click', function() {
-			player.setAttribute('animation-mixer', 'clip', 'handraising');
-				setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				player.setAttribute('animation-mixer', 'clip', 'handraising');
+				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				//if (sitFlag == "Y") {
+				if (state.sit) {
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 3000);
+				} else {				
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				}
 			});
 
 			//PM Message
@@ -1122,17 +1162,27 @@
 				
 				var p = document.getElementById('player');
 				p.components["look-controls"].pitchObject.rotation.x = 0;
-				p.components["look-controls"].yawObject.rotation.y = 0.7875;				
+				p.components["look-controls"].yawObject.rotation.y = 0.7875;
+				//p.setAttribute('animation-mixer', 'clip', 'idle');
+				//var c = document.getElementById('cam');
+				//c.setAttribute('position', '0 2.6 0');
+				
+				//if (sitFlag == "Y") {
+				if (state.sit) {
+					leaveChair();
+				}
 			});
 
 			sitdownBtnEl.addEventListener('click', function(e) {
 				if (chairs[currentChair]["user"] == "") {
 					//clearInterval(sitRefreshIntervalId);
-					if (sitFlag == "Y") {
+					//if (sitFlag == "Y") {
+					if (state.sit) {
 						leaveChair();
 					}
 					
-					sitFlag = "Y";
+					//sitFlag = "Y";
+					state.sit = true;
 					chairs[currentChair]["user"] = NAF.clientId;					
 					NAF.connection.adapter.broadcastData("chairStatus", {usedFlag: "Y", currentChairId: currentChair, sender: getUserCorpId(), senderId: NAF.clientId});
 					
@@ -1197,7 +1247,13 @@
 
 			document.getElementById("spectatorDiv").style.display = "none";
 			mapBtnEl.addEventListener('click', function() {
-				
+				if ($('#map-icon').hasClass('bi-map')) {
+					$('#map-icon').removeClass('bi-map');
+					$('#map-icon').addClass('bi-map-fill');
+				} else {
+					$('#map-icon').removeClass('bi-map-fill');
+					$('#map-icon').addClass('bi-map');
+				}
 				if (mapOpenedFlag == 'N' ) {
 					/*var playerAvatar = document.getElementById('player');
 					var secondaryCamera = document.getElementById('secondaryCamera');
@@ -1237,55 +1293,71 @@
 			});
 			
 			presentBtnEl.addEventListener('click', function() {
-				var playerAvatar = document.getElementById('player');
-				playerAvatar.setAttribute('position', '2 0.2 -15.5');
-				playerAvatar.setAttribute('animation-mixer', 'clip', 'idle');
-				playerAvatar.components["look-controls"].pitchObject.rotation.x = 0;
-				playerAvatar.components["look-controls"].yawObject.rotation.y = 2.1;
-				
-				var chairSeq = ['computerchair5', 'computerchair4', 'computerchair6', 'computerchair3', 'computerchair7', 'computerchair2', 'computerchair8', 'computerchair1', 'computerchair9'];
-				var chairAva = [];
-				var userAva = [];
-				var userChairMap = {};
-				var index = 0;
-				var foundFlag = 'N';
-				var counter = 0;
-				
-				for (let i = 0; i < chairSeq.length; i++) {
-					//console.log("chairSeq: ", chairSeq[i]);
-					if (chairs[chairSeq[i]]["user"] == "") {
-						chairAva[index++] = chairSeq[i];
+				if (state.presentEnabled) {
+					$('#present-icon').removeClass("bi-file-easel-fill");
+					$('#present-icon').addClass("bi-file-easel");					
+				} else {
+					$('#present-icon').removeClass("bi-file-easel");
+					$('#present-icon').addClass("bi-file-easel-fill");	
+					//if (sitFlag == "Y") {
+					if (state.sit) {
+						leaveChair();
 					}
-				}
-				
-				index = 0;
-				$.each( usersMap, function( key, value ) {
-					if (key != "" && key != NAF.clientId) {
-						foundFlag = 'N';
-						$.each( chairs, function( keyb, value ) {
-							if (keyb != "" && chairs[keyb]["user"] == key) {
-								foundFlag = 'Y';
-							}
-						});
-						
-						if (foundFlag == 'N') {
-							userAva[index++] = key;
+					
+					var playerAvatar = document.getElementById('player');
+					playerAvatar.setAttribute('position', '8.5 0.2 -22');
+					//playerAvatar.setAttribute('animation-mixer', 'clip', 'idle');
+					playerAvatar.components["look-controls"].pitchObject.rotation.x = 0;
+					playerAvatar.components["look-controls"].yawObject.rotation.y = 2.2;
+					//var c = document.getElementById('cam');
+					//c.setAttribute('position', '0 2.6 0');
+					
+					var chairSeq = ['computerchair5', 'computerchair4', 'computerchair6', 'computerchair3', 'computerchair7', 'computerchair2', 'computerchair8', 'computerchair1', 'computerchair9'];
+					var chairAva = [];
+					var userAva = [];
+					var userChairMap = {};
+					var index = 0;
+					var foundFlag = 'N';
+					var counter = 0;
+					
+					for (let i = 0; i < chairSeq.length; i++) {
+						//console.log("chairSeq: ", chairSeq[i]);
+						if (chairs[chairSeq[i]]["user"] == "") {
+							chairAva[index++] = chairSeq[i];
 						}
 					}
-				});
-								
-				if (chairAva.length > userAva.length) {
-					counter = userAva.length;
-				} else {
-					counter = chairAva.length;
+					
+					index = 0;
+					$.each( usersMap, function( key, value ) {
+						if (key != "" && key != NAF.clientId) {
+							foundFlag = 'N';
+							$.each( chairs, function( keyb, value ) {
+								if (keyb != "" && chairs[keyb]["user"] == key) {
+									foundFlag = 'Y';
+								}
+							});
+							
+							if (foundFlag == 'N') {
+								userAva[index++] = key;
+							}
+						}
+					});
+									
+					if (chairAva.length > userAva.length) {
+						counter = userAva.length;
+					} else {
+						counter = chairAva.length;
+					}
+					
+					for (let i = 0; i < counter; i++) {
+						userChairMap[userAva[i]] = chairAva[i];
+					}
+					
+					NAF.connection.adapter.broadcastData("present", {userChairMap: userChairMap, sender: getUserCorpId(), senderId: NAF.clientId});
 				}
 				
-				for (let i = 0; i < counter; i++) {
-					userChairMap[userAva[i]] = chairAva[i];
-				}
-				
-				NAF.connection.adapter.broadcastData("present", {userChairMap: userChairMap, sender: getUserCorpId(), senderId: NAF.clientId});
-				
+				state.presentEnabled = !state.presentEnabled;
+				NAF.connection.adapter.broadcastData("presentButtonStatus", {presentStatus: state.presentEnabled, sender: playerInfo.nickname, senderId: NAF.clientId});
 				//console.log("counter: ", counter);
 				//console.log("chairAva: ", JSON.stringify(chairAva));
 				//console.log("userAva: ", JSON.stringify(userAva));
@@ -1294,45 +1366,51 @@
 
 			document.addEventListener('keydown', function(evt) {
 				if (evt.keyCode === 87 || evt.keyCode === 65 || evt.keyCode === 83 || evt.keyCode === 68 || evt.keyCode ===38 || evt.keyCode === 37 || evt.keyCode === 39 || evt.keyCode === 40) {
-					player.setAttribute('animation-mixer', 'clip', 'walking');
-					var c = document.getElementById('cam');
-					c.setAttribute('position', '0 2.6 0');
-					//clearInterval(sitRefreshIntervalId);
-					if (sitFlag == "Y") {
+					//if (sitFlag == "Y") {
+					if (state.sit) {
 						leaveChair();
 					}
+					
+					player.setAttribute('animation-mixer', 'clip', 'walking');
+					//var c = document.getElementById('cam');
+					//c.setAttribute('position', '0 2.6 0');
+					//clearInterval(sitRefreshIntervalId);					
 				}
 			});
 			
 			document.addEventListener('keyup', function(evt) {
 				if (evt.keyCode === 87 || evt.keyCode === 65 || evt.keyCode === 83 || evt.keyCode === 68 || evt.keyCode ===38 || evt.keyCode === 37 || evt.keyCode === 39 || evt.keyCode === 40) {
-					player.setAttribute('animation-mixer', 'clip', 'idle');
-					var c = document.getElementById('cam');
-					c.setAttribute('position', '0 2.6 0');
-					//clearInterval(sitRefreshIntervalId);
-					if (sitFlag == "Y") {
+					//if (sitFlag == "Y") {
+					if (state.sit) {
 						leaveChair();
 					}
+					
+					player.setAttribute('animation-mixer', 'clip', 'idle');
+					//var c = document.getElementById('cam');
+					//c.setAttribute('position', '0 2.6 0');
+					//clearInterval(sitRefreshIntervalId);					
 				}
 				if (evt.keyCode === 49) {
-					player.setAttribute('animation-mixer', 'clip', 'waving');
-					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);					
+					//player.setAttribute('animation-mixer', 'clip', 'waving');
+					//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+					wavingBtnEl.click();					
 				}
 
 				if (evt.keyCode === 50) {
-					player.setAttribute('animation-mixer', 'clip', 'shakinghand');
-					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);		
+					//player.setAttribute('animation-mixer', 'clip', 'shakinghand');
+					//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);	
+					shakeHandBtnEl.click();
 				}
 			
 				if (evt.keyCode === 51) {
-					player.setAttribute('animation-mixer', 'clip', 'handraising');
-					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+					//player.setAttribute('animation-mixer', 'clip', 'handraising');
+					//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+					raiseHandBtnEl.click();
 				}			
 			});
 			//End set player animation
 
-			NAF.connection.subscribeToDataChannel("talking", (senderId, dataType, data, targetId) =>{				
-				console.log(data)
+			NAF.connection.subscribeToDataChannel("talking", (senderId, dataType, data, targetId) =>{								
 				if (usersMap[data.senderId]) {
 					var senderEl = document.getElementById(data.senderId + "_name");
 					var mute_icon = document.getElementById(data.senderId + "_mute_icon");
@@ -1473,6 +1551,14 @@
 				}
 			});
 			
+			NAF.connection.subscribeToDataChannel("presentButtonStatus", (senderId, dataType, data, targetId) => {				
+				if (data.presentStatus) {
+					presentBtnEl.disabled = true;
+				} else {
+					presentBtnEl.disabled = false;
+				}	
+			});
+			
 			NAF.connection.subscribeToDataChannel("allChairStatus", (senderId, dataType, data, targetId) => {
 				//console.log('allChairStatus subscribe1 data.senderId: ' + data.senderId);
 				//console.log('allChairStatus subscribe1 data.targetId: ' + data.targetId);
@@ -1495,7 +1581,7 @@
 		$(window).on('click', e => {			
 			const target = e.target
 			//console.log('click');
-			console.log(target);
+			//console.log(target);
 			if (target.matches('.a-mouse-cursor-hover')) {
 				//When click on the avatar, there would be 3 events
 				//First event is from a-scene
