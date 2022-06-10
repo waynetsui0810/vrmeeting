@@ -1,16 +1,28 @@
 <html>
   <head>     
-		<script src="scripts/jquery/jquery-3.6.0.min.js"></script>   
+		<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-icons.css" />		
+		<link rel="stylesheet" type="text/css" href="css/fontawesome-free/css/all.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/style.css" />
+		<script src="scripts/jquery/jquery-3.6.0.min.js"></script>
+		<script src="scripts/bootstrap/bootstrap.min.js"></script>
+		<script src="scripts/popper.min.js"></script>	 
   </head>
   <body onload=getMeetings()>
-    <div class="login-page">
+    <div id="login-page" class="login-page">
       <div class="form">
-        <h2>Enter room details</h2>        
-        <form class="login-form"></form>          
-          <input type="text" id="corpid" name="corpid" placeholder="CORP ID" required/>
-          <input type="password" id="password" name="password" placeholder="Password" required/>
-          <select id="room" name="room"></select>
-          <button onclick=submitForm()>Join room</button>
+        <h2 style="text-align:center;">Virtual Meeting</h2>        
+        <form class="login-form row mb-3"></form>          
+          <div class="form-group col-md-12">            
+            <input type="text" id="corpid" name="corpid" placeholder="CORP ID" class="form-control" required/><br/>
+          </div>
+          <div class="form-group col-md-12">            
+            <input type="password" id="password" name="password" placeholder="Password" class="form-control" required/><br/>
+          </div>
+          <select id="room" name="room" required>
+            <option value="0">--Please Select--</option>
+          </select>
+          <button class="btn btn-primary" onclick=submitForm()>Join room</button>
         </form>
       </div>
     </div>
@@ -44,10 +56,14 @@
         data: dataString,
         contentType: 'application/json',
         success: function(data) {          
-          var dataObj = JSON.parse(data);          
+          var dataObj = JSON.parse(data);                 
           //window.location.href ="/aframe.html?room="+roomId+"&corpid="+corpId+"&username="+encodeURIComponent(dataObj.displayName);
           //When create account for new user, there is a field "nickname" which stored in MongoDB, avatar will use the nickname to display
           window.location.href ="/aframe.html?room="+roomId+"&corpid="+corpId;
+        },
+        error: function(data) {          
+          $("#corpid").val(""); 
+          $("#password").val("");
         }
       });
     }

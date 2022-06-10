@@ -71,7 +71,19 @@
   overflow: auto;
   z-index: 10;
 }
-
+.helpDiv {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  margin-top: -250px;
+  margin-left: -300px;
+  display: none;
+  width: 600px;
+  height: 500px;
+  background-color: whitesmoke;  
+  padding: 5px;
+  opacity: 0.8;
+}
 .ava-actions {
   position: absolute;
   display: none;
@@ -91,12 +103,20 @@
   overflow: auto;
   z-index: 10;				
 }
+.greetings {
+  position: absolute;
+  display: flex;
+  bottom: 3%;
+  right: 3%;
+  z-index: 10;
+}
 .actions {
   position: absolute;
   display: flex;
   bottom: 3%;
   left: 3%;
 }
+
 #spectatorDiv {
   width: 400px;
   height: 300px;
@@ -141,7 +161,7 @@
   margin: 0 1px;
 }
 .g-btn {
-  display: none;
+  display: block;
 }
 .show {
   display: block;
@@ -150,3 +170,33 @@
   display: none;
 }
 
+
+.viutv {
+  width: 400px;
+  height: 300px;
+  position: fixed;
+  z-index: 10;
+  background-color: whitesmoke;  
+  left: 1%;
+  bottom: 5%;
+}
+
+.viu-frame {
+  width: 100%;
+  height: 100%;
+  border: 1px solid black;
+  position: relative;
+}
+
+.login-page {
+  position: absolute;
+  top: 1%;
+  left: 50%;  
+  margin-left: -250px;
+  display: block;
+  width: 500px;
+  height: 300px;
+  background-color: whitesmoke;  
+  padding: 5px;
+  opacity: 0.8;
+}

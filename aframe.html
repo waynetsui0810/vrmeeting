@@ -157,16 +157,19 @@
 		raycaster="objects:.raycastable"
 		inspector-plugin-recast
 		light="defaultLightsEnabled: false"
+		vr-mode-ui="enabled: false"
 		>
-		<a-assets timeout="5000">
+		<a-assets>
 			<video id="demo" src="video/MS_vs_Meta.mp4"></video>
 			<!--<video id="viutv" src="https://viu.tv/" crossorigin></video>-->
 			<img id="pink" src="images/1hyyIUi.jpg" crossorigin="anonymous" />
 			<img src="images/floor.png" id="grid" crossorigin="anonymous" />
 			<img src="images/WMNH2OF.jpg" id="chrome" crossorigin="anonymous" />
-			<img id="sky" src="images/WqlqEkq.jpg" crossorigin="anonymous" />
+			<!--<img id="sky" src="images/WqlqEkq.jpg" crossorigin="anonymous" />-->
+			<img id="sky" src="images/HdrOutdoorCityPathDayClear001_JPG_4K.jpg" crossorigin="anonymous" />
 			<img id="ha" src="images/ha_logo.png" crossorigin="anonymous" />
-			<img id="floor" src="images/FabricDenim_3K.jpg" crossorigin="anonymous" />
+			<!--<img id="floor" src="images/FabricDenim_3K.jpg" crossorigin="anonymous" />-->
+			<img id="floor" src="images/CarpetTwistNatural001_COL_4K.jpg" crossorigin="anonymous" />
 
 			<a-asset-item id="dawningFont" src="fonts/dawningOfANewDayRegular.typeface.json?1490305922844"></a-asset-item>
 			<a-asset-item id="exoFont" src="fonts/exo2Black.typeface.json?1490305922150"></a-asset-item>
@@ -176,9 +179,9 @@
 			
 			<a-asset-item id="tableCross" src="glb/tableCross.glb"></a-asset-item>
 			<a-asset-item id="chairDesk" src="glb/chairDesk.glb"></a-asset-item>
-			<a-asset-item id="wall" src="glb/wall.glb"></a-asset-item>
+			<a-asset-item id="wall" src="glb/wall2.glb"></a-asset-item>
 			<a-asset-item id="wallCorner" src="glb/wallCorner.glb"></a-asset-item>
-			<a-asset-item id="wallDoorway" src="glb/wallDoorway.glb"></a-asset-item>
+			<a-asset-item id="wallDoorway" src="glb/wallDoorway2.glb"></a-asset-item>
 			<a-asset-item id="pottedPlant" src="glb/pottedPlant.glb"></a-asset-item>
 			<a-asset-item id="trashcan" src="glb/trashcan.glb"></a-asset-item>
 			<a-asset-item id="floor" src="glb/floorFull.glb"></a-asset-item>
@@ -187,7 +190,7 @@
 			<a-asset-item id="plant" src="glb/plant.glb"></a-asset-item>
 			<a-asset-item id="flower" src="glb/flower.glb"></a-asset-item>
 			<a-asset-item id="computerchair" src="glb/computerchair.glb"></a-asset-item>
-			<a-asset-item id="navmesh" src="glb/navmesh_4.gltf"></a-asset-item>
+			<a-asset-item id="navmesh" src="glb/navmesh_5.gltf"></a-asset-item>
 			<a-asset-item id="conferenceTable" src="glb/conferenceTable.gltf"></a-asset-item>
 			
 			<!-- Network asset -->						
@@ -196,8 +199,7 @@
 					<!--<a-entity look-at="#player" class="scr" geometry="primitive: plane; width: 8; height: 4.5;" position = "0 3.5 2" rotation="0 180 0" material="side:front;" networked-video-source="streamName: screen"></a-entity>-->
 					<!--<a-entity class="scr_user" id="scr_user"  scale="6 6 6" position="2.8 8.8 -3" material="color:#000000" rotation="0 -90 0" text="value: Someone will share screen" ></a-entity>-->
 					<!--<a-entity class="scr" geometry="primitive: plane; width: 12; height: 6.75;" position = "2.8 5 -3.5" rotation="0 -90 0" material="side:front;" networked-video-source="streamName: screen"></a-entity>-->
-					<a-entity class="scr" geometry="primitive: plane; width: 24; height: 13.5;" position = "8.8 7.3 -9.5" rotation="0 -90 0" material="side:front;" networked-video-source></a-entity>
-					<a-entity class="scr2" geometry="primitive: plane; width: 12; height: 6.75;" position = "-6.5 5 3.5" rotation="0 180 0" material="side:front;" networked-video-source></a-entity>
+					<a-entity class="scr" geometry="primitive: plane; width: 24; height: 13.5;" position = "5.8 7.3 -9.5" rotation="0 -90 0" material="side:front;" networked-video-source></a-entity>					
 				</a-entity>
 			</template>
 									
@@ -223,6 +225,7 @@
 			</a-entity>
 			<a-entity id="localAvatar" class="localAvatar" rotation="0 180 0" scale="1.6 1.6 1.6" position="0 0 0.6">
 			</a-entity>			
+			<a-sphere color="red" radius="1.2" position="0 2 0.6"></a-sphere>
 		</a-entity>		
 		<!--adds the text with custom font-->
 		<a-entity position="-3 1 -6" rotation="5 0 0">		
@@ -241,7 +244,7 @@
 			<a-entity position="-1 3 -16.5" scale="0.6 1.2 1" text="font: aileronsemibold; value: POC on WebVR; width: 16; color:black;" material="color:pink; metalness:0.9; roughness: 0.05; sphericalEnvMap: #chrome;"></a-entity>
 		</a-entity>
 		
-		<a-entity class="scr_background" geometry="primitive: plane; width: 24; height: 13.5;" position = "9 7.3 -9.5" rotation="0 -90 0" material="color:#000000"></a-entity>
+		<a-entity class="scr_background" geometry="primitive: plane; width: 24; height: 13.5;" position = "6 7.3 -9.5" rotation="0 -90 0" material="color:#000000"></a-entity>
 			
 		<a-entity 
 			  geometry="primitive: plane; width: 50; height: 50;" rotation="-90 0 0"
@@ -260,16 +263,16 @@
 <!--		<a-sky src="#sky" radius="50" ></a-sky> -->
 		<a-sky  color="#E5F7FB" radius="100" ></a-sky>
 		<a-entity id="room" position="0 0 0">
-			<a-entity id="wall1" gltf-model="#wall" scale="18 11.5 2" position="-8 0.2 4"></a-entity>
+			<a-entity id="wall1" gltf-model="#wall" scale="15 11.5 2" position="-8 0.2 4"></a-entity>
 			<a-entity id="door" gltf-model="#wallDoorway" scale="12 11.5 2" position="-20 0.2 4"></a-entity>
 			<a-entity id="wall3" gltf-model="#wall" scale="27 11.5 2" position="-20 0.2 -23" rotation="0 -90 0"></a-entity>			
-			<a-entity id="wall4" gltf-model="#wall" scale="27 11.5 2" position="10 0.2 4" rotation="0 90 0"></a-entity>
-			<a-entity id="wall2" gltf-model="#wall" scale="30 11.5 2" position="10 0.2 -23" rotation="0 180 0"></a-entity>		
+			<a-entity id="wall4" gltf-model="#wall" scale="27 11.5 2" position="7 0.2 4" rotation="0 90 0"></a-entity>
+			<a-entity id="wall2" gltf-model="#wall" scale="27 11.5 2" position="7 0.2 -23" rotation="0 180 0"></a-entity>		
 			<a-entity id="plant1" gltf-model="#plant" scale="0.02 0.02 0.02" position="-18.3 0.2 2.275" rotation="270 0 0"></a-entity>
 			<!--<a-entity id="flower1" gltf-model="#flower" scale="0.025 0.025 0.025" position="-4.5 1.54 -1.683" rotation="270 0 0"></a-entity>
 			<a-entity id="flower2" gltf-model="#flower" scale="0.025 0.025 0.025" position="-8 1.54 -1.683" rotation="270 90 0"></a-entity>
 			<a-entity id="table" gltf-model="#table" scale="0.9 0.65 0.9" position="-5.68 0.2 -3" rotation="0 90 0"></a-entity>-->
-			<a-entity id="conferenceTable" gltf-model="#conferenceTable" scale="4 2 2.5" position="-2.2 -1.66 -8.8" rotation="0 90 0"></a-entity>
+			<a-entity id="conferenceTable" gltf-model="#conferenceTable" scale="4 2 1.5" position="-2.2 -1.66 -8.8" rotation="0 90 0"></a-entity>
 			<a-entity id="computerchair1" class="chair raycastable" gltf-model="#computerchair" scale="0.23 0.23 0.23" rotation="0 115 0" position="-2.6 0.2 -1.7"></a-entity>
 			<a-entity id="computerchair2" class="chair raycastable" gltf-model="#computerchair" scale="0.23 0.23 0.23" rotation="0 110 0" position="-3.25 0.2 -3.7"></a-entity>
 			<a-entity id="computerchair3" class="chair raycastable" gltf-model="#computerchair" scale="0.23 0.23 0.23" rotation="0 105 0" position="-3.6 0.2 -5.7"></a-entity>
@@ -291,9 +294,16 @@
 			<a-camera spectator="canvas:#spectatorDiv;" active="false" wasd-controls-enabled="false" look-controls-enabled="false">
 			</a-camera>
 		</a-entity>
+		<a-entity id="screenCamera" position="-2.3 5.7 -9.5" rotation="0 270 0">
+			<a-camera id="screenCam" spectator="canvas:#spectatorScreenDiv;" active="false" wasd-controls-enabled="false" look-controls-enabled="false">
+			</a-camera>
+		</a-entity>
 		<a-entity light="type: ambient; color: #FEFEFE; intensity: 0.8;"></a-entity>
 		<a-light type="directional" intensity="0.8" position="0 0 0" rotation="-90 0 0" target="#directionaltarget">
     		<a-entity id="directionaltarget" position="0 0 -1"></a-entity>
+		</a-light>
+		<a-light type="directional" intensity="0.2" position="0 0 0" rotation="0 270 0" target="#directionaltargetb">
+    		<a-entity id="directionaltargetb" position="0 0 -1"></a-entity>
 		</a-light>
 	</a-scene>
 
@@ -321,6 +331,40 @@
 		<button id="zoomIn-btn" onclick="this.blur();"><i class="bi bi-zoom-in"></i></button>
 		<button id="zoomOut-btn" onclick="this.blur();"><i class="bi bi-zoom-out"></i></button>	
 	</div>
+	
+	<div id="spectatorScreenDiv" style="opacity: 0;text-align: right;background-color: transparent;">
+	</div>
+
+	<div id="helpDiv" class="helpDiv">
+		<table align="center">
+			<tr height="100%">
+				<td colspan="2" height="100%" width="100%" valign="middle" align="center">
+					<i class="bi bi-question" style="font-size:2rem;"></i>&nbsp;How to Use
+				</td>
+			</tr>			
+		</table>
+		<table align="center" border="1" cellpadding="1" cellspacing="1">
+			<tr>
+				<td>Controls: </td>
+				<td>Use "W", "S", "A", "D" key to move forward, backward, left and right</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+				<td>Mouse drag to face left/ right and up/down</td>
+			</tr>
+			<tr>
+				<td colspan="2">&nbsp;</td>
+			</tr>
+			<tr>
+				<td><i class="bi bi-mic"></i></td>
+				<td>Mute or un-mute the microphone</td>
+			</tr>
+			<tr>
+				<td><i class="bi bi-camera"></i></td>
+				<td>Share the camera</td>
+			</tr>
+		</table>
+	</div>
 
 	<div class="actions">		
 		<button id="audio-btn" type="button" title="Mute/Un-Mute" class="btn btn-primary btn-circle btn-md"><i id="mic-icon" class="bi bi-mic" style="font-size:2rem;"></i></button>&nbsp;&nbsp;
@@ -332,13 +376,32 @@
 
 		<button id="map-btn" type="button" title="Show Map" class="btn btn-primary btn-circle btn-md" onclick="this.blur();"><i id="map-icon" class="bi bi-map" style="font-size:2rem;"></i></button>&nbsp;&nbsp;
 		<button id="present-btn" type="button" title="Present Mode" class="btn btn-primary btn-circle btn-md" onclick="this.blur();"><i id="present-icon" class="bi bi-file-easel" style="font-size:2rem;"></i></button>&nbsp;&nbsp;
-
+		<button id="viewscreen-btn" type="button" title="View Screen" class="btn btn-primary btn-circle btn-md" onclick="this.blur();"><i id="viewscreen-icon" class="bi bi-aspect-ratio" style="font-size:2rem;"></i></button>&nbsp;&nbsp;	
+		
+		<button id="help-btn" type="button" title="Help" class="btn btn-primary btn-circle btn-md"><i id="help-icon" class="bi bi-question-circle" style="font-size:2rem;"></i></button>&nbsp;&nbsp;
+		<!--
 		<button id="greetings-btn" type="button" title="Greeting" class="btn btn-primary greetings-btn btn-circle btn-md"><i class="fas fa-glass-cheers" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;		
 		<button id="waving-btn" type="button" title="Wave Hand" class="g-btn btn btn-primary btn-circle btn-md"><i class="fas fa-hands-wash" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;
 		<button id="shake-hand-btn" type="button" title="Hand Shake" class="g-btn btn btn-primary btn-circle btn-md"><i class="far fa-handshake" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;
-		<button id="raise-hand-btn" type="button" title="Raise Hand" class="g-btn btn btn-primary btn-circle btn-md"><i class="far fa-hand-paper" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;		
+		<button id="raise-hand-btn" type="button" title="Raise Hand" class="g-btn btn btn-primary btn-circle btn-md"><i class="far fa-hand-paper" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+		<button id="clap-hand-btn" type="button" title="Hand Clap" class="g-btn btn btn-primary btn-circle btn-md"><i class="far fa-thumbs-up" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+		<button id="yes-btn" type="button" title="Yes" class="g-btn btn btn-primary btn-circle btn-md"><i class="far fa-thumbs-up" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+		<button id="no-btn" type="button" title="No" class="g-btn btn btn-primary btn-circle btn-md"><i class="far fa-thumbs-down" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+		<button id="gangnam-btn" type="button" title="Gangnam Style" class="g-btn btn btn-primary btn-circle btn-md"><i class="far fa-thumbs-up" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+		<button id="hiphop-btn" type="button" title="Hip Hop" class="g-btn btn btn-primary btn-circle btn-md"><i class="far fa-thumbs-up" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+		-->
 	</div>	
 
+	<div class="greetings">
+		<button id="waving-btn" type="button" title="Wave Hand" class="g-btn btn btn-primary btn-circle btn-md"><i class="fas fa-hand-sparkles" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;
+		<button id="raise-hand-btn" type="button" title="Raise Hand" class="g-btn btn btn-primary btn-circle btn-md"><i class="far fa-hand-paper" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+		<button id="clap-hand-btn" type="button" title="Hand Clap" class="g-btn btn btn-primary btn-circle btn-md"><i class="fas fa-praying-hands" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+		<button id="yes-btn" type="button" title="Yes" class="g-btn btn btn-primary btn-circle btn-md"><i class="far fa-thumbs-up" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+		<button id="no-btn" type="button" title="No" class="g-btn btn btn-primary btn-circle btn-md"><i class="far fa-thumbs-down" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+		<button id="gangnam-btn" type="button" title="Gangnam Style" class="g-btn btn btn-primary btn-circle btn-md"><i class="fas fa-horse" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+		<button id="hiphop-btn" type="button" title="Hip Hop" class="g-btn btn btn-primary btn-circle btn-md"><i class="fas fa-running" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+	</div>
+	
 	<div class="ava-actions">
 		<!--
 		<img id="pm-btn" src="images/private_message.png" alt="Private Message" title="Private Message" width="32" height="32" />
@@ -347,29 +410,31 @@
 		<button id="pm-btn" title="PM" class="btn btn-primary"><i class="bi bi-file-lock"></i></button>
 		<button id="teleport-btn" title="Teleport To" class="btn btn-primary"><i class="bi bi-box-arrow-right"></i></button>
 	</div>
-
+	
 	<div class="chair-actions">
 		<!--<img id="sitdown-btn" src="images/sit.png" alt="Sit Down" title="Sit Down" width="32" height="32" />-->
 		<button id="sitdown-btn" title="Sit" class="btn btn-primary"><i class="fas fa-chair"></i></button>
 	</div>
 
+	
+	
 	<!--
 	<div id="vittv" class="viutv">
 		<iframe id="viu-frame" class="viu-frame" src="https://viu.tv/ch/99" frameborder="0"></iframe>
 	</div>
 	-->
 	<script>
-		const params = getUrlParams();		
+		const params = getUrlParams();				
 		const usersMap = {};
 		const pmMap = {};
 		const state = {};
 		const playerInfo = {};
 		const chairs = {};
-		const sitdownEyeLevel = 2;
+		const sitdownEyeLevel = 2.1;
 				
 		var chairArrayRow;
 		chairArrayRow = {};		
-		chairArrayRow["yaxis"] = 4.8;
+		chairArrayRow["yaxis"] = 4.9;
 		chairArrayRow["user"] = "";
 		chairs["computerchair1"] = chairArrayRow;
 		chairArrayRow = {};		
@@ -424,6 +489,11 @@
 		const wavingBtnEl = document.getElementById('waving-btn');	
 		const shakeHandBtnEl = document.getElementById('shake-hand-btn');	
 		const raiseHandBtnEl = document.getElementById('raise-hand-btn');	
+		const clapHandBtnEl = document.getElementById('clap-hand-btn');
+		const yesBtnEl = document.getElementById('yes-btn');
+		const noBtnEl = document.getElementById('no-btn');
+		const gangnamBtnEl = document.getElementById('gangnam-btn');
+		const hiphopBtnEl = document.getElementById('hiphop-btn');
 				
 		const selectPmTargetEl = document.getElementById('select-pm-target');
 		const pmBtnEl = document.getElementById('pm-btn');		
@@ -434,6 +504,11 @@
 		const sitdownBtnEl = document.getElementById('sitdown-btn');
 		const presentBtnEl = document.getElementById('present-btn');
 		const mapBtnEl = document.getElementById('map-btn');
+		const viewScreenBtnEl = document.getElementById('viewscreen-btn');
+		const helpBtnEl = document.getElementById('help-btn');
+		
+		var viewScreenOpenedFlag = 'N';
+		
 		var mapOpenedFlag = 'N';
 		var refreshIntervalId;	
 		var secondaryCameraX = -8;
@@ -457,6 +532,10 @@
 		var sitRefreshIntervalId;
 		var chairYAxis = -999999;
 		//var sitFlag = "N";
+
+		var defaultPosX = -14;
+		var defaultPosY = 0;
+		var defaultPosZ = 3;
 		
 		zoomInBtnEl.addEventListener('click', function() {
 			secondaryCameraY = secondaryCameraY - 1;
@@ -535,6 +614,8 @@
 
 		function setAvatar(params) {							
 			var corpid = params.corpid;
+			var randomX = defaultPosX + (Math.random() + 1) / 2;
+			var randomZ = defaultPosZ + (Math.floor(Math.random() * 10) + 1) / 2;
 			$.ajax({
 				url: "https://160.1.42.191:9876/users/corp/" + corpid,
 				type: "GET",
@@ -545,6 +626,7 @@
 					playerInfo.avatar = d.avatar;
 
 					var p = document.getElementById('player');
+					p.setAttribute('position', randomX + ' ' + defaultPosY + ' ' + randomZ);
 					p.setAttribute('networked', 'template:#'+playerInfo.corpid+'-avatar-template;attachTemplateToLocal:false;');
 					
 					var c = document.getElementById('corp');
@@ -636,12 +718,13 @@
     		var decode = function (s) { return decodeURIComponent(s.replace(pl, ' ')); };
     		var query = window.location.search.substring(1);
     		var urlParams = {};
-
+						
     		match = search.exec(query);
     		while (match) {
 	      		urlParams[decode(match[1])] = decode(match[2]);
       			match = search.exec(query);
-    		}
+			}
+						
 			return urlParams;
 		}
 
@@ -654,9 +737,9 @@
 			myName.setAttribute('id', clientId + '_name');
 			
 			if(addListener) {
-				myName.innerHTML = "<font color=blue>" + name + "</font><br/><img id='" + clientId + "_photo' class='participant_photo' src='photo/" + photoName + "' />";
+				myName.innerHTML = "<font color=white>" + name + "</font><br/><img id='" + clientId + "_photo' class='participant_photo' src='photo/" + photoName + "' />";
 			} else {
-				myName.innerHTML = "<font color=blue>" + name + "</font><br/><img id='" + clientId + "_photo' class='my_photo' src='photo/" + photoName + "' />";
+				myName.innerHTML = "<font color=white>" + name + "</font><br/><img id='" + clientId + "_photo' class='my_photo' src='photo/" + photoName + "' />";
 			}
 			
 			me.append(myName);
@@ -868,8 +951,8 @@
 			};
 
 			selectPmTargetEl.addEventListener('change', function() {
-				console.log(this.value);
-				console.log(this.options[this.selectedIndex].text);
+				//console.log(this.value);
+				//console.log(this.options[this.selectedIndex].text);
 				avatarClicked = this.value;
 				setPM(this.options[this.selectedIndex].text, this.value);
 			});
@@ -926,7 +1009,7 @@
 					$('#chat-text-icon').addClass('bi-chat-text');
 				}
 				$('#chatUI').toggleClass('show');
-			})
+			});
 
 			// Handle camera button click (Show and Hide)
 			cameraBtnEl.addEventListener('click', async () => {				
@@ -980,12 +1063,8 @@
 					var el = document.createElement('a-entity');
 					el.setAttribute('class', 'scr');
 					el.setAttribute('networked', 'template:#share-screen-template');	
-
-					var el2 = document.createElement('a-entity');
-					el2.setAttribute('class', 'scr1');
-					el2.setAttribute('networked', 'template:#share-screen-template');
-					scene.appendChild(el);					
-					scene.appendChild(el2);
+					
+					scene.appendChild(el);										
 				}
 				cameraBtnEl.disabled = !state.screenEnabled;
 				state.screenEnabled = !state.screenEnabled;
@@ -994,6 +1073,17 @@
 				NAF.connection.adapter.broadcastData("streaming", {camStatus: state.cameraEnabled, screenStatus: state.screenEnabled, sender: playerInfo.nickname, senderId: NAF.clientId});
 			});
 			
+			helpBtnEl.addEventListener('click', function() {
+				if ($('#help-icon').hasClass('bi-question-circle')) {
+					$('#help-icon').removeClass('bi-question-circle');
+					$('#help-icon').addClass('bi-question-circle-fill');
+				} else {
+					$('#help-icon').removeClass('bi-question-circle-fill');
+					$('#help-icon').addClass('bi-question-circle');
+				}
+				$('#helpDiv').toggleClass('show');
+			});
+
 			scene.addEventListener('adapter-ready', ({ detail: adapter }) => {
 				// We don't use the syncOccupants API, set requestedOccupants to be the same array instance as availableOccupants				
 				adapter.requestedOccupants = adapter.availableOccupants;
@@ -1011,7 +1101,7 @@
 					console.warn("Microphone access not allowed. This client will not broadcast audio.");
 				});
 			});
-
+			
 			var els = document.getElementsByClassName("chair");
 
 			Array.from(els).forEach((el) => {
@@ -1028,14 +1118,13 @@
 		});
 
 		// Fired when a networked entity is created 
-		document.body.addEventListener("entityCreated", function(evt) {			
+		document.body.addEventListener("entityCreated", function(evt) {						
 			const networkedComponent = evt.detail.el.getAttribute("networked");						
 			var networkedComponentChild = evt.detail.el.children;
 			usersMap[networkedComponent.creator] = {
 				networkId: networkedComponent.networkId,
 				el: evt.detail.el
-			};
-						
+			};			
 			if (networkedComponent.creator !== "") {			
 				if (networkedComponent.template.indexOf('avatar') >= 0) {	
 					//console.log(usersMap);				
@@ -1098,10 +1187,11 @@
 
 		function onConnect() {			
 			//addSchema();			
+			if(history.replaceState) history.replaceState({}, "", "/");			
 			console.log("onConnect", new Date());
-			console.log("Client ID: " + NAF.clientId);		
+			//console.log("Client ID: " + NAF.clientId);		
 			var naf_adapter = NAF.connection.adapter;
-			console.log("NAF Adapter: ", naf_adapter);	
+			//console.log("NAF Adapter: ", naf_adapter);				
 			//setParticipant(NAF.clientId, getUserCorpId(), false);
 			setParticipant(NAF.clientId, playerInfo.nickname, playerInfo.photo, false);
 
@@ -1109,35 +1199,107 @@
 			var player = document.getElementById('player');			
 			
 			wavingBtnEl.addEventListener('click', function() {
-				player.setAttribute('animation-mixer', 'clip', 'waving');
+				//player.setAttribute('animation-mixer', 'clip', 'waving');
 				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
 				//if (sitFlag == "Y") {
 				if (state.sit) {
-					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 3000);
+					player.setAttribute('animation-mixer', 'clip', 'sittingcheer');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 4000);
 				} else {				
+					player.setAttribute('animation-mixer', 'clip', 'waving');
 					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
 				}
 			});
 
+			/*
 			shakeHandBtnEl.addEventListener('click', function() {
-				player.setAttribute('animation-mixer', 'clip', 'shakinghand');
+				//player.setAttribute('animation-mixer', 'clip', 'shakinghand');
 				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
 				//if (sitFlag == "Y") {
 				if (state.sit) {
+					player.setAttribute('animation-mixer', 'clip', 'shakinghand');
 					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 3000);
 				} else {				
+					player.setAttribute('animation-mixer', 'clip', 'shakinghand');
 					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
 				}
 			});
-
+			*/
 			raiseHandBtnEl.addEventListener('click', function() {
-				player.setAttribute('animation-mixer', 'clip', 'handraising');
+				//player.setAttribute('animation-mixer', 'clip', 'handraising');
 				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
 				//if (sitFlag == "Y") {
 				if (state.sit) {
+					player.setAttribute('animation-mixer', 'clip', 'sittingraise');
 					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 3000);
-				} else {				
+				} else {		
+					player.setAttribute('animation-mixer', 'clip', 'handraising');
 					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				}
+			});
+			
+			clapHandBtnEl.addEventListener('click', function() {
+				//player.setAttribute('animation-mixer', 'clip', 'clapping');
+				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				//if (sitFlag == "Y") {
+				if (state.sit) {
+					player.setAttribute('animation-mixer', 'clip', 'sittingclap');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 3000);
+				} else {		
+					player.setAttribute('animation-mixer', 'clip', 'clapping');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				}
+			});
+			
+			yesBtnEl.addEventListener('click', function() {
+				//player.setAttribute('animation-mixer', 'clip', 'yes');
+				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				//if (sitFlag == "Y") {
+				if (state.sit) {
+					player.setAttribute('animation-mixer', 'clip', 'sittingyes');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 3000);
+				} else {		
+					player.setAttribute('animation-mixer', 'clip', 'yes');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3500);
+				}
+			});
+			
+			noBtnEl.addEventListener('click', function() {
+				//player.setAttribute('animation-mixer', 'clip', 'no');
+				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				//if (sitFlag == "Y") {
+				if (state.sit) {
+					player.setAttribute('animation-mixer', 'clip', 'sittingno');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 3800);
+				} else {		
+					player.setAttribute('animation-mixer', 'clip', 'no');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 4000);
+				}
+			});
+			
+			gangnamBtnEl.addEventListener('click', function() {
+				//player.setAttribute('animation-mixer', 'clip', 'gangnam');
+				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				//if (sitFlag == "Y") {
+				if (state.sit) {
+					//player.setAttribute('animation-mixer', 'clip', 'gangnam');
+					//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 10000);
+				} else {		
+					player.setAttribute('animation-mixer', 'clip', 'gangnam');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 12500);
+				}
+			});
+			
+			hiphopBtnEl.addEventListener('click', function() {
+				//player.setAttribute('animation-mixer', 'clip', 'hiphop');
+				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				//if (sitFlag == "Y") {
+				if (state.sit) {
+					//player.setAttribute('animation-mixer', 'clip', 'hiphop');
+					//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 10000);
+				} else {		
+					player.setAttribute('animation-mixer', 'clip', 'hiphop');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 17500);
 				}
 			});
 
@@ -1155,9 +1317,9 @@
 				var pos = target.getAttribute('position');
 
 				//me.setAttribute('look-at', '#naf-' + usersMap[avatarClicked].networkId);
-				var newX = pos.x + 3;
+				var newX = pos.x + 2;
 				var newY = pos.y;
-				var newZ = pos.z + 3;
+				var newZ = pos.z + 2;
 				teleportTo(newX+' '+newY+' '+newZ);
 				
 				var p = document.getElementById('player');
@@ -1201,7 +1363,7 @@
 					
 					var p = document.getElementById('player');
 					p.setAttribute('animation-mixer', 'clip', 'sittingidle');
-					p.components["look-controls"].pitchObject.rotation.x = 0.07;
+					p.components["look-controls"].pitchObject.rotation.x = 0.15;
 					p.components["look-controls"].yawObject.rotation.y = chairs[currentChair]["yaxis"];
 					//console.log("chairs[currentChair][yaxis]: ", chairs[currentChair]["yaxis"]);
 					
@@ -1305,7 +1467,7 @@
 					}
 					
 					var playerAvatar = document.getElementById('player');
-					playerAvatar.setAttribute('position', '8.5 0.2 -22');
+					playerAvatar.setAttribute('position', '5.5 0.2 -22');
 					//playerAvatar.setAttribute('animation-mixer', 'clip', 'idle');
 					playerAvatar.components["look-controls"].pitchObject.rotation.x = 0;
 					playerAvatar.components["look-controls"].yawObject.rotation.y = 2.2;
@@ -1363,6 +1525,26 @@
 				//console.log("userAva: ", JSON.stringify(userAva));
 				//console.log("userChairMap: ", JSON.stringify(userChairMap));				
 			});
+			
+			document.getElementById("spectatorScreenDiv").style.display = "none";
+			viewScreenBtnEl.addEventListener('click', function() {
+				if ($('#viewscreen-icon').hasClass('bi-aspect-ratio')) {
+					$('#viewscreen-icon').removeClass('bi-aspect-ratio');
+					$('#viewscreen-icon').addClass('bi-aspect-ratio-fill');
+				} else {
+					$('#viewscreen-icon').removeClass('bi-aspect-ratio-fill');
+					$('#viewscreen-icon').addClass('bi-aspect-ratio');
+				}
+				
+				if (viewScreenOpenedFlag == 'N' ) {					
+					document.getElementById("spectatorScreenDiv").style.display = "";
+					document.getElementById("spectatorScreenDiv").style.opacity = "1";
+					viewScreenOpenedFlag = 'Y';
+				} else if (viewScreenOpenedFlag == 'Y' ) {
+					document.getElementById("spectatorScreenDiv").style.display = "none";
+					viewScreenOpenedFlag = 'N';
+				}
+			});
 
 			document.addEventListener('keydown', function(evt) {
 				if (evt.keyCode === 87 || evt.keyCode === 65 || evt.keyCode === 83 || evt.keyCode === 68 || evt.keyCode ===38 || evt.keyCode === 37 || evt.keyCode === 39 || evt.keyCode === 40) {
@@ -1390,23 +1572,33 @@
 					//c.setAttribute('position', '0 2.6 0');
 					//clearInterval(sitRefreshIntervalId);					
 				}
-				if (evt.keyCode === 49) {
-					//player.setAttribute('animation-mixer', 'clip', 'waving');
-					//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				if (evt.keyCode === 49) {					
 					wavingBtnEl.click();					
 				}
 
-				if (evt.keyCode === 50) {
-					//player.setAttribute('animation-mixer', 'clip', 'shakinghand');
-					//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);	
-					shakeHandBtnEl.click();
-				}
-			
-				if (evt.keyCode === 51) {
-					//player.setAttribute('animation-mixer', 'clip', 'handraising');
-					//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				if (evt.keyCode === 50) {					
 					raiseHandBtnEl.click();
-				}			
+				}	
+
+				if (evt.keyCode === 51) {				
+					clapHandBtnEl.click();
+				}	
+				
+				if (evt.keyCode === 52) {					
+					gangnamBtnEl.click();
+				}	
+				
+				if (evt.keyCode === 53) {					
+					hiphopBtnEl.click();
+				}	
+
+				if (evt.keyCode === 89) {					
+					yesBtnEl.click();
+				}	
+				
+				if (evt.keyCode === 78) {					
+					noBtnEl.click();
+				}	
 			});
 			//End set player animation
 
@@ -1543,7 +1735,7 @@
 						if (key != "") {
 							if (chairs[key]["user"] == NAF.clientId) {	//already sit down							
 								var p = document.getElementById('player');
-								p.components["look-controls"].pitchObject.rotation.x = 0.07;
+								p.components["look-controls"].pitchObject.rotation.x = 0.15;
 								p.components["look-controls"].yawObject.rotation.y = chairs[key]["yaxis"];								
 							}
 						}
@@ -1597,11 +1789,11 @@
 					$('.ava-actions').removeClass('show')
 				}				
 			}
-
+			/*
 			if (target.matches('.greetings-btn')) { 
     			return $('.g-btn').toggleClass('show');
 			}			 
-  
+			*/
   			if (!target.matches('[data-inside]')) { 
     			$('.g-btn').removeClass('show');
 			}
@@ -1611,7 +1803,7 @@
 			}
 		});
 
-		$(window).on('mousedown', e => {
+		$(window).on('mousedown', e => {			
 			if (e.pageX != 'undefined' || e.clientX != 'undefined') {
 				if (e.pageX == null && e.clientX != null) {
 					cursorX = e.clientX;
@@ -1622,6 +1814,7 @@
 				}
 			}			  
 		});
+		
 		
 	</script>
   </body>
