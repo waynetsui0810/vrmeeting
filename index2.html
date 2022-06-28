@@ -1,0 +1,52 @@
+<html>
+  <head>     
+		<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-icons.css" />		
+		<link rel="stylesheet" type="text/css" href="css/fontawesome-free/css/all.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/style.css" />
+		<script src="scripts/jquery/jquery-3.6.0.min.js"></script>
+		<script src="scripts/bootstrap/bootstrap.min.js"></script>
+		<script src="scripts/popper.min.js"></script>	 
+  </head>
+  <body>
+    <div id="login-page" class="login-page">
+      <div class="form">
+        <h2 style="text-align:center;">HA Virtual Meeting</h2>        
+        <h3 style="text-align:center;">Please login</h3>
+        <form class="login-form row mb-3"></form>          
+          <div class="form-group col-md-12">            
+            <input type="text" id="corpid" name="corpid" placeholder="CORP ID" class="form-control" required/><br/>
+          </div>
+          <div class="form-group col-md-12">            
+            <input type="password" id="password" name="password" placeholder="Password" class="form-control" required/><br/>
+          </div>         
+          <button class="btn btn-primary" onclick=submitForm()>Join room</button>
+        </form>
+      </div>
+    </div>
+  </body>
+  <script>
+    function submitForm() {      
+      var corpId = document.getElementById('corpid').value;
+      var pw = document.getElementById('password').value;
+      var dataString = JSON.stringify({'corpid': corpId, 'password': pw});      
+      $.ajax({
+        url: "https://160.1.42.1:9876/auth/ldap",
+        type: "POST",
+        data: dataString,
+        contentType: 'application/json',
+        success: function(data) {          
+          var dataObj = JSON.parse(data);                 
+          //window.location.href ="/aframe.html?room="+roomId+"&corpid="+corpId+"&username="+encodeURIComponent(dataObj.displayName);
+          //When create account for new user, there is a field "nickname" which stored in MongoDB, avatar will use the nickname to display
+          //window.location.href ="/aframe.html?room="+roomId+"&corpid="+corpId;
+          window.location.href ="/select_room.html?corpid="+corpId;
+        },
+        error: function(data) {          
+          $("#corpid").val(""); 
+          $("#password").val("");
+        }
+      });
+    }
+  </script>
+</html>

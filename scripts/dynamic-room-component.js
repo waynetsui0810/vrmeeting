@@ -47,7 +47,7 @@ AFRAME.registerComponent('dynamic-room', {
 	
 	// Setup networked-scene		
     var networkedComp = {
-		serverURL: 'wss://160.1.42.191/janus',
+		serverURL: 'wss://160.1.43.93/janus',
 		app: 'VRMeeting',
 		room: roomname,
 		adapter: 'janus',
@@ -58,7 +58,7 @@ AFRAME.registerComponent('dynamic-room', {
   
 	  //console.info('Init networked-aframe with settings:', networkedComp);
 	  el.setAttribute('networked-scene', networkedComp);
-	  el.emit("connect", null, false);	
+	  el.emit("connect", null, false);		  
   },
 
   getUrlParams: function () {

@@ -1,0 +1,87 @@
+<html>
+    <head>     
+		<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-icons.css" />		
+		<link rel="stylesheet" type="text/css" href="css/fontawesome-free/css/all.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/style.css" />
+		<script src="scripts/jquery/jquery-3.6.0.min.js"></script>
+		<script src="scripts/bootstrap/bootstrap.min.js"></script>
+        <script src="scripts/popper.min.js"></script>	 
+        <script src="scripts/get-url-param.js"></script>
+    </head>
+    <body onload=getMeetings()>
+        <h2 style="text-align:center;">HA Virtual Meeting</h2>        
+        <h3 style="text-align:center;">Please select room to join</h3>
+        <div id="roomids">
+            <table id="roominfo" width="100%" cellpadding="1" cellspacing="1">                
+            </table>
+        </div>
+    </body>
+    <script>        
+        const params = getUrlParams(); 
+        
+        function getMeetings() {                       
+            let rooms = document.getElementById('roomids');
+            $.ajax({
+                url: "https://160.1.42.1:9876/meetings/attendee/" + params.corpid,
+                type: 'GET',
+                success: function(res) {                                        
+                    let tbl = document.getElementById('roominfo');
+                    if (res.length === 0) {
+                        var no_meeting = document.createElement('h2');
+                        no_meeting.setAttribute('style', 'text-align:center;');
+                        no_meeting.textContent = 'There is no meeting for you.';
+                        rooms.appendChild(no_meeting);
+                    } else {
+                        let num_rows = res.length <= 3 ? 1 : (Math.floor(res.length / 3) + ((res.length % 3) == 0 ? 0 : 1));  
+                        let tr = document.createElement('tr');                                              
+                        let i = 1;
+                        res.forEach(function(r) {            
+                            let v = r.id + "|" + r.roomid;
+                            let o = document.createElement('td');
+                            o.setAttribute('style', 'border: 1px solid; vertical-align: top;');
+                            let c = document.createElement('div');
+                            c.setAttribute('id', r.id);
+                            //c.setAttribute('style', 'border-style: solid;');
+                            c.value = v;
+                            
+                            c.appendChild(document.createTextNode('Room Name: ' + r.roomid));  
+                            c.appendChild(document.createElement('br'));
+                            c.appendChild(document.createTextNode('Meeting description: ' + r.description));
+                            c.appendChild(document.createElement('br'));                            
+                            c.appendChild(document.createTextNode('Attendees:'));
+                            c.appendChild(document.createElement('br'));
+                            let a = r.attendees;
+                            a.forEach(function(att) {
+                                c.appendChild(document.createTextNode(att.corpid));
+                                c.appendChild(document.createElement('br'));
+                            });
+                            o.appendChild(c);
+
+                            let b = document.createElement('button');
+                            b.setAttribute('id', v);
+                            b.setAttribute('class', 'btn btn-primary');                            
+                            b.textContent = 'Join Room';
+                            b.setAttribute('onclick', 'joinRoom(this.id);');
+
+
+                            o.appendChild(b);
+                            tr.appendChild(o);             
+                            tbl.appendChild(tr);
+                            if (i % 3 == 0) {
+                                tr = document.createElement('tr');
+                            }
+                            i++;
+                        });
+                    }
+                }
+            });
+            if(history.replaceState) history.replaceState({}, "", "/");	
+        }
+
+        function joinRoom(roomId) {
+            console.log(roomId);
+            window.location.href ="/aframe.html?room="+roomId+"&corpid="+params.corpid;     
+        }
+    </script>
+</html>
