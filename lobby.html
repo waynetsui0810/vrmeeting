@@ -1,0 +1,505 @@
+<html>
+    <head>     
+		<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-icons.css" />		
+		<link rel="stylesheet" type="text/css" href="css/fontawesome-free/css/all.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/style.css" />
+		<script src="scripts/jquery/jquery-3.6.0.min.js"></script>
+		<script src="scripts/bootstrap/bootstrap.min.js"></script>
+        <script src="scripts/popper.min.js"></script>	 
+        <script src="scripts/get-url-param.js"></script>
+    </head>
+    <body onload=getMeetings()>
+        <h2 style="text-align:center;">HA Virtual Meeting</h2>        
+        <h3 style="text-align:center;">Please select room to join</h3>
+        <div id="roomids">
+            <table id="roominfo" width="100%" cellpadding="1" cellspacing="1">                
+            </table>
+        </div>
+        <div id="admin" class="actions">
+
+        </div>
+        <div id="forms" class="form-popup"></div>
+    </body>
+    <script>        
+        const params = getUrlParams(); 
+
+        function getMeetings() {    
+            console.log(window.sessionStorage);         
+            if (window.sessionStorage.getItem('corpid') === null || window.sessionStorage.getItem('corpid') !== params.corpid) {
+                window.location.href = "/";
+            } else {    
+                window.sessionStorage.clear();
+                let rooms = document.getElementById('roomids');
+                $.ajax({
+                    url: "https://160.1.42.1:9876/meetings/attendee/" + params.corpid,
+                    type: 'GET',
+                    success: function(res) {                                        
+                        let tbl = document.getElementById('roominfo');
+                        if (res.length === 0) {
+                            var no_meeting = document.createElement('h2');
+                            no_meeting.setAttribute('style', 'text-align:center;');
+                            no_meeting.textContent = 'There is no meeting for you.';
+                            rooms.appendChild(no_meeting);
+                        } else {                        
+                            let tr = document.createElement('tr');                                              
+                            let i = 1;
+                            res.forEach(function(r) {                                           
+                                let v = r._id + "|" + r.roomid;
+                                let o = document.createElement('td');
+                                o.setAttribute('style', 'border: 1px solid; vertical-align: top;');
+                                let c = document.createElement('div');
+                                c.setAttribute('id', r._id);                                             
+                                
+                                let n = document.createElement('b');
+                                n.textContent = 'Room Name: ' + r.roomid;
+                                //c.appendChild(document.createTextNode('Room Name: ' + r.roomid));  
+                                c.appendChild(n);
+                                c.appendChild(document.createElement('br'));
+                                c.appendChild(document.createElement('br'));
+                                c.appendChild(document.createTextNode('Meeting description: ' + r.description));
+                                c.appendChild(document.createElement('br'));                            
+                                c.appendChild(document.createElement('br'));
+                                c.appendChild(document.createTextNode('Attendees:'));                                
+                                c.appendChild(document.createElement('br'));
+                                //let a = r.attendees;
+                                let p = r.participants;
+                                //console.log(p);
+                                /*
+                                a.forEach(function(att) {
+                                    c.appendChild(document.createTextNode(att.corpid));
+                                    c.appendChild(document.createElement('br'));                                    
+                                });
+                                */
+                                p.forEach(function(att) {
+                                    c.appendChild(document.createTextNode(att.nickname + " (" + att.corpid + ")"));
+                                    c.appendChild(document.createElement('br'));
+                                });
+                                c.appendChild(document.createElement('br'));
+                                o.appendChild(c);
+
+                                let b = document.createElement('button');
+                                b.setAttribute('id', v);
+                                b.setAttribute('class', 'btn btn-primary');                            
+                                b.textContent = 'Join Room';
+                                b.setAttribute('onclick', 'joinRoom(this.id);');
+                                
+                                o.appendChild(b);
+                                o.appendChild(document.createTextNode(' '));
+                                if (r.chairman === params.corpid) {
+                                    let e = document.createElement('button');
+                                    e.setAttribute('id', 'edit-' + r.id);
+                                    e.setAttribute('class', 'btn btn-primary');
+                                    e.textContent = 'Edit Meeting';
+                                    e.setAttribute('onclick', '#');
+                                    o.appendChild(e);
+                                }
+                                tr.appendChild(o);             
+                                tbl.appendChild(tr);
+                                if (i % 3 == 0) {
+                                    tr = document.createElement('tr');
+                                }
+                                i++;
+                            });
+                        }
+                        
+                        $.ajax({
+                            url: "https://160.1.42.1:9876/users/corp/" + params.corpid,
+                            type: 'GET',
+                            success: function(res) {                                 
+                                let admin_div = document.getElementById('admin');
+                                if (res.role === 'admin') {
+                                    let add_user = document.createElement('button');
+                                    add_user.setAttribute('id', 'add-user-btn');
+                                    add_user.setAttribute('class', 'btn btn-primary');
+                                    add_user.setAttribute('onclick', 'addUser()');
+                                    add_user.textContent = 'Add New User';
+                                    
+                                    let add_meeting = document.createElement('button');
+                                    add_meeting.setAttribute('id', 'add-metting-btn');
+                                    add_meeting.setAttribute('class', 'btn btn-primary');
+                                    add_meeting.setAttribute('onclick', 'addMeeting()');
+                                    add_meeting.textContent = 'Create New Meeting';
+
+                                    admin_div.appendChild(add_user);       
+                                    admin_div.innerHTML += "&nbsp;";
+                                    admin_div.appendChild(add_meeting);
+
+                                    //Add user form                                    
+                                    let forms_div = document.getElementById('forms');
+                                    let add_user_form_div = document.createElement('div');
+                                    add_user_form_div.setAttribute('id', 'add-user-form-div');                                    
+                                    add_user_form_div.setAttribute('class', 'form-div');                                    
+
+                                    let user_form_head = document.createElement('h3');
+                                    user_form_head.textContent = 'Add New User Form';
+
+                                    let add_user_form = document.createElement('form');
+                                    add_user_form.setAttribute('id', 'add-user-form');                                    
+                                    add_user_form.setAttribute('class', 'form-container');
+                                    add_user_form.setAttribute('enctype', 'multipart/form-data');
+
+                                    let corp_id = document.createElement('input');
+                                    corp_id.setAttribute('id', 'corpid');
+                                    corp_id.setAttribute('type', 'text');   
+                                    corp_id.setAttribute('name', 'corpid');
+                                    corp_id.setAttribute('placeholder', 'CORP ID');
+                                    corp_id.setAttribute('class', 'form-control');
+                                    corp_id.setAttribute('required', '');
+
+                                    let role_user = document.createElement('input');
+                                    role_user.setAttribute('id', 'user');
+                                    role_user.setAttribute('name', 'role');
+                                    role_user.setAttribute('type', 'radio');
+                                    role_user.setAttribute('value', 'user');
+                                    role_user.setAttribute('checked', '');
+                                    role_user.setAttribute('class', 'form-check-input');
+
+                                    let role_user_lbl = document.createElement('label')
+                                    role_user_lbl.setAttribute('id', 'user-label');
+                                    role_user_lbl.setAttribute('for', 'user');
+                                    role_user_lbl.setAttribute('class', 'form-check-label');                                    
+                                    role_user_lbl.textContent = "User";
+
+                                    let role_admin = document.createElement('input');
+                                    role_admin.setAttribute('id', 'admin');
+                                    role_admin.setAttribute('name', 'role');
+                                    role_admin.setAttribute('value', 'admin');
+                                    role_admin.setAttribute('type', 'radio');
+                                    role_admin.setAttribute('class', 'form-check-input');
+
+                                    let role_admin_lbl = document.createElement('label')
+                                    role_admin_lbl.setAttribute('id', 'admin-label');
+                                    role_admin_lbl.setAttribute('for', 'admin');
+                                    role_admin_lbl.setAttribute('class', 'form-check-label');
+                                    role_admin_lbl.textContent = "Admin";
+
+                                    let nickname = document.createElement('input');
+                                    nickname.setAttribute('id', 'nickname');
+                                    nickname.setAttribute('type', 'text');
+                                    nickname.setAttribute('name', 'nickname');
+                                    nickname.setAttribute('placeholder', 'Nickname');
+                                    nickname.setAttribute('class', 'form-control');
+                                    nickname.setAttribute('required', '');
+
+                                    let photo_lbl = document.createElement('label');
+                                    photo_lbl.setAttribute('id', 'photo_label');
+                                    photo_lbl.setAttribute('class', 'form-label');
+                                    photo_lbl.textContent = 'User photo upload:';
+
+                                    let photo = document.createElement('input');
+                                    photo.setAttribute('id', 'photo');
+                                    photo.setAttribute('type', 'file');
+                                    photo.setAttribute('name', 'photo');
+                                    photo.setAttribute('class', 'form-control');
+
+                                    let avatar_lbl = document.createElement('label');
+                                    avatar_lbl.setAttribute('id', 'avatar_label');
+                                    avatar_lbl.setAttribute('class', 'form-label');
+                                    avatar_lbl.textContent = 'User avatar model updload:';
+
+                                    let avatar = document.createElement('input');
+                                    avatar.setAttribute('id', 'avatar');
+                                    avatar.setAttribute('type', 'file');
+                                    avatar.setAttribute('name', 'avatar');
+                                    avatar.setAttribute('class', 'form-control');
+
+                                    let submit_user_btn = document.createElement('button');
+                                    submit_user_btn.setAttribute('id', 'submit-add-user');
+                                    submit_user_btn.setAttribute('class', 'btn btn-primary');
+                                    submit_user_btn.setAttribute('onclick', "submitForm('add-user-form')");
+                                    submit_user_btn.textContent = 'Confirm';
+
+                                    let cancel_user_btn = document.createElement('button');
+                                    cancel_user_btn.setAttribute('id', 'cancel-add-user');
+                                    cancel_user_btn.setAttribute('class', 'btn btn-secondary');
+                                    cancel_user_btn.setAttribute('onclick', 'cancelForm()');
+                                    cancel_user_btn.textContent = 'Cancel';
+
+                                    add_user_form.appendChild(corp_id);
+                                    add_user_form.appendChild(role_user);
+                                    add_user_form.appendChild(role_user_lbl);
+                                    add_user_form.appendChild(role_admin);
+                                    add_user_form.appendChild(role_admin_lbl);
+                                    add_user_form.appendChild(nickname);
+                                    add_user_form.appendChild(photo_lbl);
+                                    add_user_form.appendChild(photo);
+                                    add_user_form.appendChild(avatar_lbl);
+                                    add_user_form.appendChild(avatar);
+                                    add_user_form.appendChild(submit_user_btn);
+                                    add_user_form.appendChild(cancel_user_btn);
+                                    add_user_form_div.appendChild(user_form_head);
+                                    add_user_form_div.appendChild(add_user_form);
+                                    forms_div.appendChild(add_user_form_div);
+
+                                    //Add meeting form
+                                    let add_meeting_form_div = document.createElement('div');
+                                    add_meeting_form_div.setAttribute('id', 'add-meeting-form-div');    
+                                    add_meeting_form_div.setAttribute('class', 'form-div');                                                                    
+
+                                    let meeting_form_head = document.createElement('h3');
+                                    meeting_form_head.textContent = 'Create New Meeting Form';
+
+                                    let add_meeting_form = document.createElement('form');
+                                    add_meeting_form.setAttribute('id', 'add-meeting-form');                                    
+                                    add_meeting_form.setAttribute('class', 'form-container');
+
+                                    let meeting_name = document.createElement('input');
+                                    meeting_name.setAttribute('id', 'roomid');
+                                    meeting_name.setAttribute('type', 'text');   
+                                    meeting_name.setAttribute('name', 'roomid');
+                                    meeting_name.setAttribute('placeholder', 'Meeting Room Name');
+                                    meeting_name.setAttribute('class', 'form-control');
+                                    meeting_name.setAttribute('required', '');
+
+                                    let description = document.createElement('input');
+                                    description.setAttribute('id', 'description');
+                                    description.setAttribute('type', 'text');
+                                    description.setAttribute('name', 'description');
+                                    description.setAttribute('placeholder', 'Meeting Description');
+                                    description.setAttribute('class', 'form-control');
+                                    description.setAttribute('required', '');
+
+                                    let att_lbl = document.createElement('label');
+                                    att_lbl.setAttribute('id', 'att-label');
+                                    att_lbl.setAttribute('for', 'att-select');
+                                    att_lbl.textContent = "Please select attendees:";
+
+                                    let users_select = document.createElement('select');
+                                    users_select.setAttribute('id', 'user-select');
+                                    users_select.setAttribute('name', 'users');
+                                    users_select.setAttribute('multiple', '');
+                                    users_select.setAttribute('ondblclick', 'addAttendee(this)');
+
+                                    let attendees = document.createElement('select');
+                                    attendees.setAttribute('id', 'att-select');
+                                    attendees.setAttribute('name', 'attendees');
+                                    attendees.setAttribute('multiple', '');
+                                    attendees.setAttribute('ondblclick', 'removeAttendee(this)');
+                                    attendees.setAttribute('onclick', 'selectChairman(this)');
+
+                                    let att_pls_select = document.createElement('option');
+                                    att_pls_select.setAttribute('value', '0');
+                                    att_pls_select.textContent = 'Double click left side to add';
+                                    attendees.appendChild(att_pls_select);
+                                    
+                                    let chairman_select_lbl = document.createElement('label');
+                                    chairman_select_lbl.setAttribute('id', 'chairman-select');
+                                    chairman_select_lbl.textContent = "Please highlight one of the select users as chairman.";
+
+                                    let chairman = document.createElement('input');
+                                    chairman.setAttribute('id', 'chairman');
+                                    chairman.setAttribute('name', 'chairman');
+                                    chairman.setAttribute('type', 'text');
+                                    chairman.setAttribute('class', 'form-control');
+                                    chairman.setAttribute('onfocus', 'this.blur()');            
+                                    chairman.setAttribute('required', '');                        
+
+                                    let submit_meeting_btn = document.createElement('button');
+                                    submit_meeting_btn.setAttribute('id', 'submit-add-meeting');
+                                    submit_meeting_btn.setAttribute('class', 'btn btn-primary');
+                                    submit_meeting_btn.setAttribute('onclick', "selectAllAttendees();submitForm('add-meeting-form');")
+                                    submit_meeting_btn.textContent = 'Confirm';
+
+                                    let cancel_meeting_btn = document.createElement('button');
+                                    cancel_meeting_btn.setAttribute('id', 'cancel-add-meeting');
+                                    cancel_meeting_btn.setAttribute('class', 'btn btn-secondary');
+                                    cancel_meeting_btn.setAttribute('onclick', 'cancelForm()');
+                                    cancel_meeting_btn.textContent = 'Cancel';
+
+                                    add_meeting_form.appendChild(meeting_name);
+                                    add_meeting_form.appendChild(description);
+                                    add_meeting_form.appendChild(att_lbl);
+                                    add_meeting_form.appendChild(document.createElement('br'));
+                                    add_meeting_form.appendChild(users_select);
+                                    add_meeting_form.appendChild(attendees);
+                                    add_meeting_form.appendChild(document.createElement('br'));
+                                    add_meeting_form.appendChild(chairman_select_lbl);
+                                    add_meeting_form.appendChild(document.createElement('br'));
+                                    add_meeting_form.appendChild(chairman);
+                                    add_meeting_form.appendChild(document.createElement('br'));
+                                    add_meeting_form.appendChild(submit_meeting_btn);
+                                    add_meeting_form.appendChild(cancel_meeting_btn);
+                                    add_meeting_form_div.appendChild(meeting_form_head);
+                                    add_meeting_form_div.appendChild(add_meeting_form);
+                                    forms_div.appendChild(add_meeting_form_div);
+
+                                    populateAttendees();
+
+                                }
+                            }
+                        });
+                    }
+                });
+                if(history.replaceState) history.replaceState({}, "", "/");	
+            }
+        }
+        var att_selected = 0;
+
+        function addAttendee(u) {                        
+            let att = document.getElementById('att-select');
+            let a = document.createElement('option');
+            a.setAttribute('value', u.value);
+            a.textContent = u[u.selectedIndex].textContent;
+            if (att_selected === 0) {
+                att.remove(0);
+            }
+            att.appendChild(a);
+            u.remove(u.selectedIndex);
+            att_selected ++;
+        }
+
+        function removeAttendee(a) {            
+            if (a.value !== "0") {
+                att_selected--;
+                let usr = document.getElementById('user-select');
+                let u = document.createElement('option');
+                u.setAttribute('value', a.value);
+                u.textContent = a[a.selectedIndex].textContent;            
+                usr.appendChild(u);
+                a.remove(a.selectedIndex);
+                if (att_selected === 0) {
+                    let att_pls_select = document.createElement('option');
+                    att_pls_select.setAttribute('value', '0');
+                    att_pls_select.textContent = 'Double click left side to add';
+                    a.appendChild(att_pls_select);
+                }
+                document.getElementById('chairman').value = "";
+            }
+        }
+
+        function selectAllAttendees() {            
+            $('#att-select option').prop('selected', true);
+        }
+
+        function selectChairman(c) {
+            let chair = document.getElementById('chairman');
+            chair.value = c.value;
+        }
+
+        function populateAttendees() {
+            $.ajax({
+                url: "https://160.1.42.1:9876/users?limit=101",
+                type: "GET",
+                //data: json,
+                contentType: 'application/json',
+                success: function(data) {                              
+                    let att = document.getElementById('user-select');
+                    data.forEach(function(d) {
+                        let o = document.createElement('option');
+                        o.setAttribute('value', d.corpid);
+                        o.textContent = d.nickname + " (" + d.corpid + ")";
+                        att.appendChild(o);
+                    });                    
+                },
+                error: function(data) {          
+                
+                }
+            }); 
+        }
+
+        function joinRoom(roomId) {                        
+            window.sessionStorage.setItem('r', roomId);
+            window.sessionStorage.setItem('u', params.corpid);
+            window.location.href = "/aframe.html?room="+roomId+"&corpid="+params.corpid;     
+            
+        }
+
+        function addUser() {
+            document.getElementById('forms').style.display = "block";
+            document.getElementById('add-user-form-div').style.display = "block";
+            document.getElementById('add-meeting-form-div').style.display = "none";
+        }
+
+        function addMeeting() {
+            document.getElementById('forms').style.display = "block";
+            document.getElementById('add-user-form-div').style.display = "none";
+            document.getElementById('add-meeting-form-div').style.display = "block";
+        }
+
+        function cancelForm() {
+            document.getElementById('add-user-form').reset();
+            document.getElementById('add-meeting-form').reset();
+            document.getElementById('forms').style.display = "none";
+            document.getElementById('add-user-form-div').style.display = "none";
+            document.getElementById('add-meeting-form-div').style.display = "none";            
+        }
+
+        function submitForm(fid) {                        
+            var formData =  new FormData(document.getElementById(fid));            
+            var svc = (fid === 'add-user-form') ? "users" : "meetings";
+            if (fid === 'add-meeting-form' && att_selected === 0) {
+                console.log("no one selected");                
+            } else {
+                var dataString = {};
+                var attendeeString = [];
+                formData.forEach((value, key) => {                                                                         
+                    if(!Reflect.has(dataString, key)){
+                        if (typeof value === "object") {
+                            console.log("Assume is file, copy the file to server...");
+                            if (key === 'photo' && value.name === '') {                 
+                                dataString[key] = 'man1.png';
+                                return;                            
+                            } 
+
+                            if (key === 'avatar' && value.name === '') {
+                                dataString[key] = 'man1.gltf';
+                                return;
+                            } 
+                            dataString[key] = value;
+                        } else if (key === "attendees") {
+                            dataString[key] = [];
+                            attendeeString.push(value);
+                        } else {
+                            dataString[key] = value;
+                        }
+                        return;
+                    } else if (key === "attendees") {
+                        attendeeString.push(value);
+                    }                
+                });
+                if (fid === 'add-meeting-form') {
+                    attendeeString.map(function(a) {                
+                        dataString.attendees.push({"corpid":a});
+                    });
+                }
+                var json = JSON.stringify(dataString);
+                console.log(json);
+                
+                $.ajax({
+                    url: "https://160.1.42.1:9876/" + svc,
+                    type: "POST",
+                    data: json,
+                    contentType: 'application/json',
+                    success: function(data) {          
+                        console.log(data);                        
+                         
+                        //window.sessionStorage.setItem('corpid', params.corpid);
+                        //location.reload();
+                        //window.location.href ="/lobby.html?corpid="+params.corpid;
+                    },
+                    error: function(data) {          
+                    
+                    }
+                }); 
+                                
+                document.getElementById('add-user-form').reset();
+                document.getElementById('add-meeting-form').reset();
+                document.getElementById('user-select').options.length = 0;
+                let att = document.getElementById('att-select');
+                att.options.length = 0;
+                let att_pls_select = document.createElement('option');
+                att_pls_select.setAttribute('value', '0');
+                att_pls_select.textContent = 'Double click left side to add';
+                att.appendChild(att_pls_select);
+                populateAttendees();
+                att_selected = 0;
+                document.getElementById('forms').style.display = "none";
+                document.getElementById('add-user-form-div').style.display = "none";
+                document.getElementById('add-meeting-form-div').style.display = "none";  
+                
+               
+            }   
+        }
+    </script>
+</html>

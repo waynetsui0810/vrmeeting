@@ -8,7 +8,7 @@
 		<script src="scripts/bootstrap/bootstrap.min.js"></script>
 		<script src="scripts/popper.min.js"></script>	 
   </head>
-  <body onload=getMeetings()>
+  <body>
     <div id="login-page" class="login-page">
       <div class="form">
         <h2 style="text-align:center;">HA Virtual Meeting</h2>        
@@ -19,38 +19,20 @@
           </div>
           <div class="form-group col-md-12">            
             <input type="password" id="password" name="password" placeholder="Password" class="form-control" required/><br/>
-          </div>
-          <select id="room" name="room" required>
-            <option value="0">--Please Select--</option>
-          </select>
-          <button class="btn btn-primary" onclick=submitForm()>Join room</button>
+          </div>         
+          <button class="btn btn-primary" onclick=submitForm()>Login</button>
         </form>
+        <br/>
+        <br/>
+        For tutorial on how to use, please click <a href="/tutorial.html" target="_self">HERE</a>.
       </div>
     </div>
   </body>
   <script>
-    function getMeetings() {
-      $.ajax({
-        url: "https://160.1.42.1:9876/meetings",
-        type: 'GET',
-        success: function(res) {
-          let s = document.getElementById('room');
-          res.forEach(function(r) {            
-            let v = r.id + "|" + r.roomid;
-            let o = document.createElement('option');
-            o.value = v;
-            o.appendChild(document.createTextNode(r.roomid));
-            s.appendChild(o);;
-          });
-        }
-      });
-    }
-
-    function submitForm() {
-      var roomId = document.getElementById('room').value;
+    function submitForm() {      
       var corpId = document.getElementById('corpid').value;
       var pw = document.getElementById('password').value;
-      var dataString = JSON.stringify({'room': roomId, 'corpid': corpId, 'password': pw});      
+      var dataString = JSON.stringify({'corpid': corpId, 'password': pw});      
       $.ajax({
         url: "https://160.1.42.1:9876/auth/ldap",
         type: "POST",
@@ -60,7 +42,9 @@
           var dataObj = JSON.parse(data);                 
           //window.location.href ="/aframe.html?room="+roomId+"&corpid="+corpId+"&username="+encodeURIComponent(dataObj.displayName);
           //When create account for new user, there is a field "nickname" which stored in MongoDB, avatar will use the nickname to display
-          window.location.href ="/aframe.html?room="+roomId+"&corpid="+corpId;          
+          //window.location.href ="/aframe.html?room="+roomId+"&corpid="+corpId;
+          window.sessionStorage.setItem('corpid', corpId);
+          window.location.href ="/lobby.html?corpid="+corpId;
         },
         error: function(data) {          
           $("#corpid").val(""); 

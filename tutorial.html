@@ -1,0 +1,1161 @@
+<html>
+	<head>
+		<title>POC on WebVR using AFrame</title>				
+		<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap.min.css" />
+		<link rel="stylesheet" type="text/css" href="css/bootstrap/bootstrap-icons.css" />		
+		<link rel="stylesheet" type="text/css" href="css/fontawesome-free/css/all.min.css" />
+        <link rel="stylesheet" type="text/css" href="css/style.css" />
+        <link rel="stylesheet" type="text/css" href="css/demo.css" />
+		<script src="scripts/jquery/jquery-3.6.0.min.js"></script>
+		<script src="scripts/bootstrap/bootstrap.min.js"></script>
+		<script src="scripts/popper.min.js"></script>		
+		<script src="scripts/get-url-param.js"></script>
+		<script src="scripts/adapter-latest.js"></script>
+		<script src="scripts/aframe-ha.min.js"></script>		
+		
+		<script src="scripts/aframe-environment-component.min.js"></script>		
+		
+		<script src="scripts/aframe-extras.min.js"></script>
+		
+		<script>
+			AFRAME.registerComponent('model-opacity', {
+				schema: {default: 1.0},
+				init: function () {
+					this.el.addEventListener('model-loaded', this.update.bind(this));
+				},
+				update: function () {
+					var mesh = this.el.getObject3D('mesh');
+					var data = this.data;
+					if (!mesh) { return; }
+					mesh.traverse(function (node) {
+					if (node.isMesh) {
+						node.material.opacity = data;
+						node.material.transparent = data < 1.0;
+						node.material.needsUpdate = true;
+					}
+					});
+				}
+			});
+
+			AFRAME.registerComponent('spectator',{
+				'schema': {
+					canvas: {
+						type: 'string',
+						default: ''
+					},
+					// desired FPS of spectator dislay
+					fps: {
+						type: 'number',
+						default: '30.0'
+					}
+				},
+				'init': function() {
+					var targetEl = document.querySelector(this.data.canvas)
+
+					this.counter = 0;
+					this.renderer = new THREE.WebGLRenderer( { antialias: true } );
+
+					this.renderer.setPixelRatio( window.devicePixelRatio );
+					this.renderer.setSize( targetEl.offsetWidth, targetEl.offsetHeight );
+
+					// creates spectator canvas
+					targetEl.appendChild(this.renderer.domElement);
+				},
+				'tick': function(time, timeDelta) {
+					var loopFPS = 1000.0 / timeDelta;
+					var hmdIsXFasterThanDesiredFPS = loopFPS / this.data.fps;
+					var renderEveryNthFrame = Math.round(hmdIsXFasterThanDesiredFPS);
+
+					if(this.counter % renderEveryNthFrame === 0){
+						this.render(timeDelta);
+					}
+					this.counter += 1;  
+				},
+				'render': function(){
+					this.renderer.render( this.el.sceneEl.object3D , this.el.object3DMap.camera );
+				}
+			});
+	  
+			AFRAME.registerComponent('video-functions', {
+				init: function() {
+					let self = this;
+					this.el.addEventListener('click', function(event) {
+						var v = document.getElementById('demo');						
+						if (!v.paused) {
+							v.pause();
+						} else {
+							v.play();
+						}
+					})
+				}
+			});			
+			
+		</script>
+		<script src="scripts/aframe-randomizer-components.min.js"></script>
+		<script src="scripts/aframe-particle-system-component.min.js"></script>
+		<script src="scripts/spawn-in-circle.component.js"></script>
+		<script src="scripts/color-changer.js"></script>
+		<script src="scripts/aframe-inspector-plugin-recast.js"></script>
+		<script src="scripts/Geometry.js"></script>
+		<script src="scripts/aframe-look-at-component.min.js"></script>
+		<script src="scripts/ammo.wasm.js"></script>
+		<script src="scripts/aframe-physics-system.min.js"></script>
+		<style>
+			 .btn-circle.btn-sm {
+            	width: 30px;
+            	height: 30px;
+            	padding: 6px 0px;
+            	border-radius: 15px;
+            	font-size: 8px;
+            	text-align: center;
+        	}
+        	.btn-circle.btn-md {
+	            width: 50px;
+            	height: 50px;
+            	padding: 7px 10px;
+            	border-radius: 25px;
+            	font-size: 10px;
+            	text-align: center;
+        	}
+        	.btn-circle.btn-xl {
+	            width: 70px;
+            	height: 70px;
+            	padding: 10px 16px;
+            	border-radius: 35px;
+            	font-size: 12px;
+            	text-align: center;
+        	}
+		</style>
+  </head>
+  <body onload=nextDemoStep(1);>
+	<div id="meetingroom_div"></div>  		
+	<div id="demo-div">
+        Welcome to the HA VR Meeting Demo<br/><br/>
+        <div id="demo-step">
+            
+        </div>
+    </div>
+
+	<a-scene id="scene" 
+		cursor="rayOrigin: mouse"
+		raycaster="objects:.raycastable"
+		inspector-plugin-recast
+		light="defaultLightsEnabled: false"
+		vr-mode-ui="enabled: false"
+		physics="driver: ammo; debug: false; debugDrawMode: 1;"
+		>
+		<a-assets>
+			<video id="demo" src="video/MS_vs_Meta.mp4"></video>
+			<!--<video id="viutv" src="https://viu.tv/" crossorigin></video>-->
+			<img id="pink" src="images/1hyyIUi.jpg" crossorigin="anonymous" />
+			<img src="images/floor.png" id="grid" crossorigin="anonymous" />
+			<img src="images/WMNH2OF.jpg" id="chrome" crossorigin="anonymous" />
+			<!--<img id="sky" src="images/WqlqEkq.jpg" crossorigin="anonymous" />-->
+			<img id="sky" src="images/HdrOutdoorCityPathDayClear001_JPG_4K.jpg" crossorigin="anonymous" />
+			<img id="ha" src="images/ha_logo.png" crossorigin="anonymous" />
+			<!--<img id="floor" src="images/FabricDenim_3K.jpg" crossorigin="anonymous" />-->
+			<img id="floor" src="images/CarpetTwistNatural001_COL_4K.jpg" crossorigin="anonymous" />
+
+			<a-asset-item id="dawningFont" src="fonts/dawningOfANewDayRegular.typeface.json?1490305922844"></a-asset-item>
+			<a-asset-item id="exoFont" src="fonts/exo2Black.typeface.json?1490305922150"></a-asset-item>
+			<a-asset-item id="exoItalicFont" src="fonts/exo2BlackItalic.typeface.json?1490305922725"></a-asset-item>
+			
+			<a-asset-item id="avatarModel1" src="glb/avatar_v4.gltf"></a-asset-item>
+			
+			<a-asset-item id="tableCross" src="glb/tableCross.glb"></a-asset-item>
+			<a-asset-item id="chairDesk" src="glb/chairDesk.glb"></a-asset-item>
+			<a-asset-item id="wall" src="glb/wall2.glb"></a-asset-item>
+			<a-asset-item id="wallCorner" src="glb/wallCorner.glb"></a-asset-item>
+			<a-asset-item id="wallDoorway" src="glb/wallDoorway2.glb"></a-asset-item>
+			<a-asset-item id="pottedPlant" src="glb/pottedPlant.glb"></a-asset-item>
+			<a-asset-item id="trashcan" src="glb/trashcan.glb"></a-asset-item>
+			<a-asset-item id="floor" src="glb/floorFull.glb"></a-asset-item>
+			<a-asset-item id="trashcan2" src="glb/trash_can.glb"></a-asset-item>
+			<a-asset-item id="table" src="glb/table_2.gltf"></a-asset-item>
+			<a-asset-item id="plant" src="glb/plant.glb"></a-asset-item>
+			<a-asset-item id="flower" src="glb/flower.glb"></a-asset-item>
+			<a-asset-item id="computerchair" src="glb/computerchair.glb"></a-asset-item>
+			<a-asset-item id="navmesh" src="glb/navmesh_5.gltf"></a-asset-item>
+			<a-asset-item id="conferenceTable" src="glb/conferenceTable.gltf"></a-asset-item>
+												
+			<template id="avatar-template">				
+				<a-entity class="avatar">						
+					<a-entity id="nametag" class="nametag" text="value: Avatar; align:center;" position="0 3.5 0" rotation="0 180 0" scale="3 3 3"></a-entity>
+					<a-entity id="nametagBack" class="nametagBack" text="value: Avatar; align:center;" position="0 3.5 0" rotation="0 0 0" scale="3 3 3"></a-entity>
+					<a-entity id="head" class="head" gltf-model="#avatarModel1" rotation="0 180 0" scale="1.6 1.6 1.6" position="0 -2 0"></a-entity>
+				</a-entity>
+			</template>			
+		</a-assets>
+		<!--<div id="player_div"></div>	-->
+		
+		<a-entity id="player" movement-controls="constrainToNavMesh:true;" position="-14 0 3" animation-mixer="clip:idle;" look-controls>
+			<a-entity id="cam" class="cam" camera position="0 2.6 0"></a-entity>
+			<a-entity id="nametag" class="nametag" text="value: Avatar; align:center;" position="0 3.1 0.6" rotation="0 180 0" scale="3 3 3">
+			</a-entity>
+			<a-entity id="nametagBack" class="nametagBack" text="value: Avatar; align:center;" position="0 3.1 0.6" rotation="0 0 0" scale="3 3 3"> 
+			</a-entity>
+			<a-entity id="corp" class="corp" visible="false">
+			</a-entity>
+			<a-entity id="localAvatar" class="localAvatar" rotation="0 180 0" scale="1.6 1.6 1.6" position="0 0 0.6">
+			</a-entity>			
+			<!--<a-sphere color="red" radius="0.3" position="0 2 -0.1"></a-sphere>-->
+		</a-entity>		
+		<!--adds the text with custom font-->
+		<a-entity position="-3 1 -6" rotation="5 0 0">		
+			<a-entity
+				rotation="0 0 0"
+				position="-8 4 -16.5">
+				<a-image src="#ha"></a-image>
+			</a-entity>
+			<a-entity
+				rotation="0 0 0"
+				position="2 4 -16.5"
+				text="font: aileronsemibold; value: Hospital Authority; width: 18; color:white;"
+				material="color:lavenderblush; metalness:1; roughness: 0; sphericalEnvMap: #pink;">
+			</a-entity>
+			<!--adds the text with custom font-->
+			<a-entity position="-1 3 -16.5" scale="0.6 1.2 1" text="font: aileronsemibold; value: POC on WebVR; width: 16; color:yellow;" material="color:pink; metalness:0.9; roughness: 0.05; sphericalEnvMap: #chrome;"></a-entity>
+		</a-entity>
+		
+		<a-entity class="scr_background" geometry="primitive: plane; width: 24; height: 13.5;" position = "6 7.3 -9.5" rotation="0 -90 0" material="color:#000000"></a-entity>
+			
+		<a-entity 
+			  geometry="primitive: plane; width: 50; height: 50;" rotation="-90 0 0"
+			  material="src: #floor; repeat: 30 30; transparent: true;"
+			  <!--material="src: #grid; repeat: 50 50; transparent: true;metalness:0.6; roughness: 0.4; sphericalEnvMap: #sky;"-->			  
+			  >
+		</a-entity>
+
+		<!--adds the lighting to make the scene more realistic-->
+		<!--
+		<a-entity light="color: #ccccff; intensity: 1; type: ambient;" visible=""></a-entity>
+		<a-entity light="color: #ffaaff; intensity: 1.5" position="5 5 5"></a-entity>
+		-->
+		<!--adds the sky-->
+		<!--<a-sky src="#sky" rotation="0 -90 0"></a-sky>-->
+<!--		<a-sky src="#sky" radius="50" ></a-sky> -->
+		<a-sky  color="#E5F7FB" radius="100" ></a-sky>
+		<a-entity id="room" position="0 0 0">
+			<a-entity id="wall1" model-opacity="1" ammo-body="type: static" ammo-shape="type: box;fit: manual; halfExtents: 13.8 2 0.2; offset: 1.5 0 0;" gltf-model="#wall" scale="15 11.5 2" position="-8 0.2 4"></a-entity>
+			<a-entity id="door" model-opacity="1" ammo-body="type: static" ammo-shape="type: box;fit: manual; halfExtents: 13.8 2 0.2; offset: 13.5 0 0;" gltf-model="#wallDoorway" scale="12 11.5 2" position="-20 0.2 4"></a-entity>
+			<a-entity id="wall3" model-opacity="1" ammo-body="type: static" ammo-shape="type: box;fit: manual; halfExtents: 13.8 2 0.2; offset: 13.5 0 0;" gltf-model="#wall" scale="27 11.5 2" position="-20 0.2 -23" rotation="0 -90 0"></a-entity>			
+			<a-entity id="wall4" model-opacity="1" ammo-body="type: static" ammo-shape="type: box;fit: manual; halfExtents: 13.8 2 0.2; offset: 13.5 0 0;" gltf-model="#wall" scale="27 11.5 2" position="7 0.2 4" rotation="0 90 0"></a-entity>
+			<a-entity id="wall2" model-opacity="1" ammo-body="type: static" ammo-shape="type: box;fit: manual; halfExtents: 13.8 2 0.2; offset: 13.5 0 0;" gltf-model="#wall" scale="27 11.5 2" position="7 0.2 -23" rotation="0 180 0"></a-entity>		
+			<a-entity id="plant1" gltf-model="#plant" scale="0.02 0.02 0.02" position="-18.3 0.2 2.275" rotation="270 0 0"></a-entity>
+			<!--<a-entity id="flower1" gltf-model="#flower" scale="0.025 0.025 0.025" position="-4.5 1.54 -1.683" rotation="270 0 0"></a-entity>
+			<a-entity id="flower2" gltf-model="#flower" scale="0.025 0.025 0.025" position="-8 1.54 -1.683" rotation="270 90 0"></a-entity>
+			<a-entity id="table" gltf-model="#table" scale="0.9 0.65 0.9" position="-5.68 0.2 -3" rotation="0 90 0"></a-entity>-->
+			<a-entity id="conferenceTable" gltf-model="#conferenceTable" scale="4 2 1.5" position="-2.2 -1.66 -8.8" rotation="0 90 0"></a-entity>
+			<a-entity id="computerchair1" class="chair raycastable" gltf-model="#computerchair" scale="0.23 0.23 0.23" rotation="0 115 0" position="-2.6 0.2 -1.7"></a-entity>
+			<a-entity id="computerchair2" class="chair raycastable" gltf-model="#computerchair" scale="0.23 0.23 0.23" rotation="0 110 0" position="-3.25 0.2 -3.7"></a-entity>
+			<a-entity id="computerchair3" class="chair raycastable" gltf-model="#computerchair" scale="0.23 0.23 0.23" rotation="0 105 0" position="-3.6 0.2 -5.7"></a-entity>
+			<a-entity id="computerchair4" class="chair raycastable" gltf-model="#computerchair" scale="0.23 0.23 0.23" rotation="0 100 0" position="-3.8 0.2 -7.7"></a-entity>
+			<a-entity id="computerchair5" class="chair raycastable" gltf-model="#computerchair" scale="0.23 0.23 0.23" rotation="0 90 0" position="-3.8 0.2 -9.7"></a-entity>
+			<a-entity id="computerchair6" class="chair raycastable" gltf-model="#computerchair" scale="0.23 0.23 0.23" rotation="0 80 0" position="-3.8 0.2 -11.7"></a-entity>
+			<a-entity id="computerchair7" class="chair raycastable" gltf-model="#computerchair" scale="0.23 0.23 0.23" rotation="0 75 0" position="-3.6 0.2 -13.7"></a-entity>
+			<a-entity id="computerchair8" class="chair raycastable" gltf-model="#computerchair" scale="0.23 0.23 0.23" rotation="0 70 0" position="-3.25 0.2 -15.7"></a-entity>
+			<a-entity id="computerchair9" class="chair raycastable" gltf-model="#computerchair" scale="0.23 0.23 0.23" rotation="0 65 0" position="-2.6 0.2 -17.7"></a-entity>
+			<a-entity id="trashcan" gltf-model="#trashcan2" scale="2.3 1.5 1.5" position="-18.7 0.2 -22.16" rotation="0 0 0"></a-entity>			
+			
+			<a-entity id="navmesh" gltf-model="#navmesh" nav-mesh position="0 0.1 0" visible="false"></a-entity>
+		</a-entity>
+        
+        <a-entity id="demo-sphere" geometry="primitive: sphere" material="color: red" position="-14 2 -16.5" ammo-body="type: static" ammo-shape="type: box;fit: manual; halfExtents: 1 1 1; offset: 0 0 0;"></a-entity>
+        <a-entity id="demo-box" geometry="primitive: box" material="color: yellow" position="-20 2 5" ammo-body="type: static" ammo-shape="type: box;fit: manual; halfExtents: 1 1 1; offset: 0 0 0;"></a-entity>
+        <a-entity id="demo-cone" geometry="primitive: cone" material="color: blue" position="-10 2 5" ammo-body="type: static" ammo-shape="type: box;fit: manual; halfExtents: 1 1 1; offset: 0 0 0;"></a-entity>
+		<!--<a-video class="raycastable" id="demoVideo" src="#demo" width="8" height="4.5" position="-6.5 5 3.5" rotation="0 180 0" video-functions></a-video>-->
+		<!--<a-video class="raycastable" id="viu" src="#viutv" width="8" height="4.5" position="-6.5 5 3.5" rotation="0 180 0"></a-video>-->
+
+		<a-entity id="secondaryCamera" position="0 15 0" rotation="-90 0 0">
+			<a-camera id="secondaryCam" class="preventCamInactive" spectator="canvas:#spectatorDiv;" active="false" wasd-controls-enabled="false" look-controls-enabled="false">
+			</a-camera>
+		</a-entity>
+		<a-entity id="screenCamera" position="-2.3 5.7 -9.5" rotation="0 270 0">
+			<a-camera id="screenCam" class="preventCamInactive" spectator="canvas:#spectatorScreenDiv;" active="false" wasd-controls-enabled="false" look-controls-enabled="false">
+			</a-camera>
+		</a-entity>
+		<a-entity light="type: ambient; color: #FEFEFE; intensity: 0.8;"></a-entity>
+		<a-light type="directional" intensity="0.8" position="0 0 0" rotation="-90 0 0" target="#directionaltarget">
+    		<a-entity id="directionaltarget" position="0 0 -1"></a-entity>
+		</a-light>
+		<a-light type="directional" intensity="0.2" position="0 0 0" rotation="0 270 0" target="#directionaltargetb">
+    		<a-entity id="directionaltargetb" position="0 0 -1"></a-entity>
+		</a-light>
+		
+		<a-entity camera id='camBack' position="-14 0 3" active="false" wasd-controls="acceleration: 27" look-controls></a-entity>
+	</a-scene>
+
+	<div id="spectatorDiv" style="opacity: 0;text-align: right; background-color: transparent;">		
+		<button id="mapMode-btn" onclick="this.blur();">Switch to Player Centric Mode</button>
+		<button id="zoomIn-btn" onclick="this.blur();"><i class="bi bi-zoom-in"></i></button>
+		<button id="zoomOut-btn" onclick="this.blur();"><i class="bi bi-zoom-out"></i></button>	
+	</div>
+	
+	<div id="spectatorScreenDiv" style="opacity: 0;text-align: right;background-color: transparent;">
+	</div>
+
+	<div id="helpDiv" class="helpDiv">
+		<table align="center">
+			<tr height="100%">
+				<td colspan="2" height="100%" width="100%" valign="middle" align="center">
+					<i class="bi bi-question" style="font-size:2rem;"></i>&nbsp;How to Use
+				</td>
+			</tr>			
+		</table>
+		<table align="center" border="1" cellpadding="1" cellspacing="1">
+			<tr>
+				<td>Controls: </td>
+				<td>Use "W", "S", "A", "D" key or the arrow keys to move forward, backward, left and right</td>
+			</tr>
+			<tr>
+				<td>&nbsp;</td>
+				<td>Mouse drag to face left/ right and up/down</td>
+			</tr>
+			<tr>
+				<td colspan="2">&nbsp;</td>
+			</tr>
+			<tr>
+				<td><i class="bi bi-mic"></i></td>
+				<td>Mute or un-mute the microphone</td>
+			</tr>
+			<!--
+			<tr>
+				<td><i class="bi bi-camera"></i></td>
+				<td>Share the camera</td>
+			</tr>
+			-->
+			<tr>
+				<td><i class="bi bi-tv"></i></td>
+				<td>Share screen/ window or browser tab page</td>
+			</tr>
+			<tr>
+				<td><i class="bi bi-chat"></i></td>
+				<td>Open the chat box for message to everyone or private message to a person</td>
+			</tr>
+			<tr>
+				<td><i class="bi bi-geo-alt"></i></td>
+				<td>Open the top view of navigation</td>
+			</tr>
+			<tr>
+				<td><i class="bi bi-file-easel"></i></td>
+				<td>Presentation mode. You will teleport to the screen wall and other participants would sit.</td>
+			</tr>
+			<tr>
+				<td><i class="bi bi-aspect-ratio"></i></td>
+				<td>While someone sharing screen, instead of view the screen wall, open a screen window in the middle.</td>
+			</tr>
+			<tr>
+				<td><i class="bi bi-person-bounding-box"></i></td>
+				<td>Click to move the camera from Main View to the back of the avatar. Viewport 1 will show about half of the avatar. Viewport 2 will show the whole avatar</td>
+			</tr>
+			<tr>
+				<td><i class="bi bi-layer-backward"></i></td>
+				<td>Click to change the camera to the front of the avatar</td>
+			</tr>
+			<tr>
+				<td><i class="bi bi-question-circle"></i></td>
+				<td>Show this menu</td>
+			</tr>
+			<tr>
+				<td colspan="2">&nbsp;</td>				
+			</tr>
+			<tr>
+				<td colspan="2">Express your emotion</td>				
+			</tr>
+			<tr>
+				<td><i class="fas fa-hand-sparkles"></i></td>
+				<td>Wave your hand. Hotkey 1</td>
+			</tr>
+			<tr>
+				<td><i class="far fa-hand-paper"></i></td>
+				<td>Raise up your hand. Hotkey 2</td>
+			</tr>
+			<tr>
+				<td><i class="fas fa-praying-hands"></i></td>
+				<td>Clap your hands. Hotkey 3</td>
+			</tr>
+			<tr>
+				<td><i class="far fa-thumbs-up"></i></td>
+				<td>Give a thumb up. Hotkey "Y"</td>
+			</tr>
+			<tr>
+				<td><i class="far fa-thumbs-down"></i></td>
+				<td>Say No. Hotkey "N"</td>
+			</tr>
+			<tr>
+				<td><i class="fas fa-horse"></i></td>
+				<td>Let's dance Gangnam Style. Hotkey "4"</td>
+			</tr>
+			<tr>
+				<td><i class="fas fa-running"></i></td>
+				<td>Let's HipHop. Hotkey "5"</td>
+			</tr>
+		</table>
+	</div>
+
+	<div class="actions">				
+		
+		<button id="viewpoint-btn" type="button" title="Change View" class="btn btn-primary rounded-pill" style="width:119px; height:40px;" onclick="this.blur();"><i id="viewpoint-icon" class="bi bi-person-bounding-box" style="font-size:1.2rem;"></i><span id="change-view-text" style="font-size: smaller;">&nbsp;Main View</span></button>&nbsp;
+		<button id="viewpointFront-btn" type="button" title="Front View" class="btn btn-primary rounded-pill" style="width:119px; height:40px;" onclick="this.blur();"><i id="viewpointFront-icon" class="bi bi-layer-backward" style="font-size:1rem;"></i><span id="front-view-text" style="font-size: smaller;">&nbsp;Front View</span></button>&nbsp;
+        <button id="help-btn" type="button" title="Help" class="btn btn-primary rounded-pill" style="width:119px; height:40px;"><i id="help-icon" class="bi bi-question-circle" style="font-size:1rem;"></i><span id="help-text" style="font-size: smaller;">&nbsp;Help</span></button>&nbsp;		
+	</div>	
+
+	<div class="greetings">
+		<button id="waving-btn" type="button" title="Wave Hand" class="g-btn btn btn-primary btn-circle btn-md" onclick="this.blur();"><i class="fas fa-hand-sparkles" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;
+		<button id="raise-hand-btn" type="button" title="Raise Hand" class="g-btn btn btn-primary btn-circle btn-md"><i class="far fa-hand-paper" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+		<button id="clap-hand-btn" type="button" title="Hand Clap" class="g-btn btn btn-primary btn-circle btn-md"><i class="fas fa-praying-hands" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+		<button id="yes-btn" type="button" title="Yes" class="g-btn btn btn-primary btn-circle btn-md"><i class="far fa-thumbs-up" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+		<button id="no-btn" type="button" title="No" class="g-btn btn btn-primary btn-circle btn-md"><i class="far fa-thumbs-down" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+		<button id="gangnam-btn" type="button" title="Gangnam Style" class="g-btn btn btn-primary btn-circle btn-md"><i class="fas fa-horse" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+		<button id="hiphop-btn" type="button" title="Hip Hop" class="g-btn btn btn-primary btn-circle btn-md"><i class="fas fa-running" style="font-size:1.5rem;"></i></button>&nbsp;&nbsp;	
+	</div>
+		
+	<div class="chair-actions">
+		<!--<img id="sitdown-btn" src="images/sit.png" alt="Sit Down" title="Sit Down" width="32" height="32" />-->
+		<button id="sitdown-btn" title="Sit" class="btn btn-primary"><i class="fas fa-chair"></i></button>
+	</div>
+	
+	<!--
+	<div id="vittv" class="viutv">
+		<iframe id="viu-frame" class="viu-frame" src="https://viu.tv/ch/99" frameborder="0"></iframe>
+	</div>
+	-->
+	<script>
+        //const params = getUrlParams();
+        var currDemoStep = 1;				
+		const usersMap = {};
+		const pmMap = {};
+		const state = {};
+		const playerInfo = {};
+		const chairs = {};
+		const sitdownEyeLevel = 2.1;
+				
+		var chairArrayRow;
+		chairArrayRow = {};		
+		chairArrayRow["yaxis"] = 4.9;
+		chairArrayRow["user"] = "";
+		chairs["computerchair1"] = chairArrayRow;
+		chairArrayRow = {};		
+		chairArrayRow["yaxis"] = 4.85;
+		chairArrayRow["user"] = "";
+		chairs["computerchair2"] = chairArrayRow;
+		chairArrayRow = {};		
+		chairArrayRow["yaxis"] = 4.8;
+		chairArrayRow["user"] = "";
+		chairs["computerchair3"] = chairArrayRow;
+		chairArrayRow = {};		
+		chairArrayRow["yaxis"] = 4.75;
+		chairArrayRow["user"] = "";
+		chairs["computerchair4"] = chairArrayRow;
+		chairArrayRow = {};		
+		chairArrayRow["yaxis"] = 4.715;
+		chairArrayRow["user"] = "";
+		chairs["computerchair5"] = chairArrayRow;
+		chairArrayRow = {};		
+		chairArrayRow["yaxis"] = 4.66;
+		chairArrayRow["user"] = "";
+		chairs["computerchair6"] = chairArrayRow;
+		chairArrayRow = {};		
+		chairArrayRow["yaxis"] = 4.61;
+		chairArrayRow["user"] = "";
+		chairs["computerchair7"] = chairArrayRow;
+		chairArrayRow = {};		
+		chairArrayRow["yaxis"] = 4.56;
+		chairArrayRow["user"] = "";
+		chairs["computerchair8"] = chairArrayRow;
+		chairArrayRow = {};		
+		chairArrayRow["yaxis"] = 4.51;
+		chairArrayRow["user"] = "";
+		chairs["computerchair9"] = chairArrayRow;
+		
+		state.currentStream = null;
+		state.cameraEnabled = false;		
+		state.screenEnabled = false;
+		state.audioEnabled = true;
+		state.stand = true;
+		state.sit = false;
+		state.presentEnabled = false;
+		
+		const ledColor = ["#64ff00", "#64ff00", "#9bff00", "#d4ff00", "#fbff00", "#ffd500", "#ffa600", "#ff5d00", "#ff0800", "#ff0800"];
+		
+		const scene = document.querySelector('a-scene');		
+		
+		const wavingBtnEl = document.getElementById('waving-btn');	
+		const shakeHandBtnEl = document.getElementById('shake-hand-btn');	
+		const raiseHandBtnEl = document.getElementById('raise-hand-btn');	
+		const clapHandBtnEl = document.getElementById('clap-hand-btn');
+		const yesBtnEl = document.getElementById('yes-btn');
+		const noBtnEl = document.getElementById('no-btn');
+		const gangnamBtnEl = document.getElementById('gangnam-btn');
+		const hiphopBtnEl = document.getElementById('hiphop-btn');		
+		const sitdownBtnEl = document.getElementById('sitdown-btn');
+		
+		const helpBtnEl = document.getElementById('help-btn');
+		const viewpointBtnEl = document.getElementById('viewpoint-btn');
+		const viewpointFrontBtnEl = document.getElementById('viewpointFront-btn');
+		
+		var viewScreenOpenedFlag = 'N';
+		
+		var mapOpenedFlag = 'N';
+		var refreshIntervalId;	
+		var secondaryCameraX = -8;
+		var secondaryCameraY = 16;
+		var secondaryCameraZ = -8;
+		const zoomInBtnEl = document.getElementById('zoomIn-btn');
+		const zoomOutBtnEl = document.getElementById('zoomOut-btn');
+		const mapModeBtnEl = document.getElementById('mapMode-btn');
+		var mapFixedModeFlag = 'Y';
+
+		var cursorX = -1;
+		var cursorY = -1;
+		var avatarClicked = -1;
+		var pmTarget = '';
+		var rcvPmFrom = '';
+		var countPmContent = 0;
+		var currentPmTarget = '';
+		var currentPmClientId = -1;
+
+		var currentChair = '';
+		var sitRefreshIntervalId;
+		var chairYAxis = -999999;
+		//var sitFlag = "N";
+
+		var defaultPosX = -14;
+		var defaultPosY = 0;
+		var defaultPosZ = 3;
+		
+		var directionDegree = 360;
+		
+		var backCamRefreshIntervalId;
+		
+		var camFlag = 0;
+		var frontView = 'N';
+		var scrollingUp = 'N';
+		var scrollingDown = 'N';
+		
+		zoomInBtnEl.addEventListener('click', function() {
+			secondaryCameraY = secondaryCameraY - 1;
+			
+			if (secondaryCameraY < 8) {
+				secondaryCameraY = 8;
+			}
+			
+			if (mapFixedModeFlag == 'Y') {
+				mapFixedMode();
+			}
+			//console.log("secondaryCameraY 1: " + secondaryCameraY);
+		});	
+
+		zoomOutBtnEl.addEventListener('click', function() {
+			secondaryCameraY = secondaryCameraY + 1;
+			
+			if (secondaryCameraY > 50) {
+				secondaryCameraY = 50;
+			}
+
+			if (mapFixedModeFlag == 'Y') {
+				mapFixedMode();
+			}
+			//console.log("secondaryCameraY 2: " + secondaryCameraY);
+		});	
+
+        function nextDemoStep(step) {
+            let demo_step = document.getElementById('demo-step');
+            const steps = {};
+            steps[1] = "1. You are now in the Avatar's Main View, you may change the viewport by clicking the <i id='viewpoint-icon' class='bi bi-person-bounding-box' style='font-size:1.2rem;'></i> button.";
+            steps[2] = "2. You changed the viewpoint so that the scene camera is on the back of the Avatar. click the <i id='viewpoint-icon' class='bi bi-person-bounding-box' style='font-size:1.2rem;'></i> again to set the scene camera further.";
+            steps[3] = "3. Now please press the 'W' or 'Up-Arrow' button to move forward until reached the sphere.";
+            steps[4] = "4. Now please press the 'S' or 'Down-Arrow' button to move backward until outside the room.";
+            steps[5] = "5. Now please press the 'A' or 'Left-Arrow' button to move left until reached the cube.";
+            steps[6] = "6. Now please press the 'D' or 'Right-Arrow' button to move right until reached the cone.";
+            steps[7] = "7. Now please use the mouse left button, press and hold and drag to look around. Then please go back inside the room.";
+            steps[8] = "8. You can also change the viewpoint to the front so that you could see your avatar's face. Click the <i id='viewpointFront-icon' class='bi bi-layer-backward' style='font-size:1rem;'></i> button to change."
+            steps[9] = "Completed. Please enjoy or click <a href='/' target='_self'>HERE</a> to back to login page.";
+            //console.log(steps[step]);
+            let ps = document.getElementById('step-id');
+            if (ps !== null) {
+                demo_step.removeChild(document.getElementById('step-id'));
+            }
+            
+            let s = document.createElement('span');
+            s.setAttribute('id', 'step-id');
+            s.innerHTML = steps[step];
+            demo_step.appendChild(s);
+        }
+
+		function mapFixedMode() {
+			var secondaryCamera = document.getElementById('secondaryCamera');
+			secondaryCamera.setAttribute('position', secondaryCameraX + ' ' + secondaryCameraY + ' ' + secondaryCameraZ);
+		}
+		
+		function mapNonFixedMode() {
+			var playerAvatar = document.getElementById('player');
+			var secondaryCamera = document.getElementById('secondaryCamera');
+			refreshIntervalId = setInterval(function () { 
+									var playerAvatarPosition = playerAvatar.getAttribute('position');
+									//console.log("playerAvatarPosition: ", playerAvatarPosition);
+									secondaryCamera.setAttribute('position', playerAvatarPosition.x + ' ' + secondaryCameraY + ' ' + playerAvatarPosition.z);
+									//console.log("secondaryCamera: ", secondaryCamera.getAttribute('position'));
+								}, 10);
+		}
+		
+		function leaveChair() {
+			clearInterval(sitRefreshIntervalId);
+			//sitFlag = "N";
+			state.sit = false;
+			
+			var p = document.getElementById('player');
+			p.setAttribute('animation-mixer', 'clip', 'idle');
+			var c = document.getElementById('cam');
+			c.setAttribute('position', '0 2.6 0');
+			
+			$.each( chairs, function( key, value ) {
+				if (key != "") {
+					
+				}
+			});			
+			//console.log('chairs leave: ' + JSON.stringify(chairs));
+		}
+		
+		function releaseChair(clientId) {
+			$.each( chairs, function( key, value ) {
+				if (key != "") {
+					if (chairs[key]["user"] == clientId) {
+						chairs[key]["user"] = "";
+					}
+				}
+			});			
+			//console.log('chairs release: ' + JSON.stringify(chairs));
+		}
+
+		function setAvatar() {										
+			var randomX = defaultPosX; // + (Math.random() + 1) / 2;
+            var randomZ = defaultPosZ; // + (Math.floor(Math.random() * 10) + 1) / 2;
+            var p = document.getElementById('player');
+
+            var l = document.getElementById('localAvatar');
+			l.setAttribute('gltf-model', 'glb/avatar_v4.gltf');	
+			p.setAttribute('position', randomX + ' ' + defaultPosY + ' ' + randomZ);										
+		}
+
+		function genClientId() {
+			let num = '';
+			for (let i = 0; i < 16; i++) {
+				num += Math.floor(Math.random() * 10).toString();
+			}
+			return num;
+		}
+
+		function getUserCorpId() {
+			var p = document.getElementById('player');
+			return p.getAttribute('corpid');
+		}
+
+		function getUserDisplayName() {
+			var p = document.getElementById('player');
+			return p.getAttribute('display_name');
+		}
+		
+		function teleportTo(position) {
+			var p = document.getElementById('player');
+			//console.log(p.getAttribute('position'));
+			//parameter position should be in the format '0 0 0'
+			p.setAttribute('position', position);
+			//console.log(p.getAttribute('position'));
+		}
+
+		document.addEventListener('DOMContentLoaded', () => {
+			console.log('DOMContentLoaded');	
+			setAvatar();
+				
+			helpBtnEl.addEventListener('click', function() {
+			    if ($('#help-icon').hasClass('bi-question-circle')) {
+					$('#help-icon').removeClass('bi-question-circle');
+					$('#help-icon').addClass('bi-question-circle-fill');
+					$('#help-btn').removeClass('btn-primary');
+					$('#help-btn').addClass('btn-success');
+				} else {
+					$('#help-icon').removeClass('bi-question-circle-fill');
+					$('#help-icon').addClass('bi-question-circle');
+					$('#help-btn').removeClass('btn-success');
+					$('#help-btn').addClass('btn-primary');
+				}
+				$('#helpDiv').toggleClass('show');
+			});
+				
+			viewpointFrontBtnEl.addEventListener('click', function() {
+				//Add class preventCamInactive on camera to prevent it inactive when other camera set to active
+				//var secondaryCam = document.getElementById('secondaryCam');
+				//secondaryCam.classList.add("preventCamInactive");
+				//var screenCam = document.getElementById('screenCam');
+				//screenCam.classList.add("preventCamInactive");
+				
+				if (frontView == 'N') {
+					//console.log("frontView = N");
+					$('#viewpointFront-btn').removeClass('btn-primary');
+					$('#viewpointFront-btn').addClass('btn-success');
+					frontView = 'Y';
+					var camBack = document.getElementById('camBack');
+					//var playerCam = document.getElementById('cam');
+					//playerCam.setAttribute('camera', 'active', false);
+					camBack.setAttribute('camera', 'active', true);
+					directionDegree = 180;
+					camBack.setAttribute('wasd-controls', 'acceleration: 27; adInverted: true; wsInverted: true;');					
+					clearInterval(backCamRefreshIntervalId);
+					backCamRefreshIntervalId = setInterval(function () { 
+																var p = document.getElementById('player');
+																var pp = p.getAttribute('position');
+																var pr = p.getAttribute('rotation');
+																var yDegree = ((pr.y % 360) + directionDegree) % 360;
+																camBack.setAttribute('position', { x: pp.x + Math.sin(yDegree * (Math.PI / 180)) * 5, y: pp.y + 3, z: pp.z + Math.cos(yDegree * (Math.PI / 180)) * 5});	
+																camBack.components["look-controls"].pitchObject.rotation.x = p.components["look-controls"].pitchObject.rotation.x;
+																camBack.components["look-controls"].yawObject.rotation.y = p.components["look-controls"].yawObject.rotation.y + 9.4;
+															}, 5);
+					
+					var playerCollision = document.getElementById('player');	
+					playerCollision.removeAttribute('ammo-shape');
+                    playerCollision.setAttribute('ammo-shape', 'type: box; fit: manual; halfExtents: 0.3 1 2.5; offset:0 0 -2.5');
+                    if (currDemoStep == 8) {
+                        currDemoStep++;
+                        nextDemoStep(currDemoStep);
+                    }
+				} else {
+					$('#viewpointFront-btn').removeClass('btn-success');
+					$('#viewpointFront-btn').addClass('btn-primary');
+					//console.log("frontView = Y");
+					clearInterval(backCamRefreshIntervalId);
+					//frontView = 'N';
+					viewpointBtnEl.click();
+				}
+			});
+				
+			viewpointBtnEl.addEventListener('click', function() {
+				//console.log("testBtnEl click! ");
+				//var secondaryCam = document.getElementById('secondaryCam');
+				//secondaryCam.classList.add("preventCamInactive");
+				//var screenCam = document.getElementById('screenCam');
+				//screenCam.classList.add("preventCamInactive");
+								
+				if (frontView == 'N') {
+					if (scrollingUp == 'Y') {
+						camFlag = camFlag - 1;
+						
+						if (camFlag < 0) {
+							camFlag = 0;
+						}
+						
+						scrollingUp = 'N';
+					} else if (scrollingDown == 'Y') {
+						camFlag = camFlag + 1;
+						
+						if (camFlag > 2) {
+							camFlag = 2;
+						}
+						
+						scrollingDown = 'N';
+					} else {
+						camFlag = (camFlag + 1) % 3;
+					}
+				}				
+				frontView = 'N';
+				$('#viewpointFront-btn').removeClass('btn-success');
+				$('#viewpointFront-btn').addClass('btn-primary');
+				var camBack = document.getElementById('camBack');
+    			var playerCam = document.getElementById('cam');
+				var distance;
+				var playerCollision = document.getElementById('player');	
+				var viewIcon = document.getElementById('viewpoint-icon');
+									
+				if (camFlag !== 0 ) {		
+					//playerCam.setAttribute('camera', 'active', false);
+					camBack.setAttribute('camera', 'active', true);
+					directionDegree = 360;
+					
+					if (camFlag == 1) {
+						$('#change-view-text').text('Viewport 1');
+						viewIcon.setAttribute('style', 'font-size: 1rem;');
+						distance = 2.5;
+						playerCollision.removeAttribute('ammo-shape');
+                        playerCollision.setAttribute('ammo-shape', 'type: box; fit: manual; halfExtents: 0.3 1 1.25; offset:0 0 1.25');
+                        if (currDemoStep === 1) {
+                            currDemoStep++;
+                            nextDemoStep(currDemoStep);
+                        }
+					}
+					if (camFlag == 2) {
+						$('#change-view-text').text('Viewport 2');
+						viewIcon.setAttribute('style', 'font-size: 0.8rem;');
+						distance = 5;
+						playerCollision.removeAttribute('ammo-shape');
+                        playerCollision.setAttribute('ammo-shape', 'type: box; fit: manual; halfExtents: 0.3 1 2.5; offset:0 0 2.5');
+                        if (currDemoStep === 2) {
+                            currDemoStep++;
+                            nextDemoStep(currDemoStep);
+                        }
+					}
+					camBack.setAttribute('wasd-controls', 'acceleration: 27;');
+					clearInterval(backCamRefreshIntervalId);
+					backCamRefreshIntervalId = setInterval(function () { 
+																var p = document.getElementById('player');
+																var pp = p.getAttribute('position');
+																var pr = p.getAttribute('rotation');
+																var yDegree = ((pr.y % 360) + directionDegree) % 360;
+																camBack.setAttribute('position', { x: pp.x + Math.sin(yDegree * (Math.PI / 180)) * distance, y: pp.y + 3, z: pp.z + Math.cos(yDegree * (Math.PI / 180)) * distance});	
+																camBack.components["look-controls"].pitchObject.rotation.x = p.components["look-controls"].pitchObject.rotation.x;
+																camBack.components["look-controls"].yawObject.rotation.y = p.components["look-controls"].yawObject.rotation.y;
+															}, 5);
+				} else if (camFlag == 0 ) {
+					$('#change-view-text').text('Main View');
+					viewIcon.setAttribute('style', 'font-size: 1.2rem;');
+					clearInterval(backCamRefreshIntervalId);
+					//camBack.setAttribute('camera', 'active', false);
+					playerCam.setAttribute('camera', 'active', true);
+					
+					var playerAmmo = document.getElementById('player');	
+					playerAmmo.removeAttribute('ammo-shape');
+				}
+			});				
+				
+			var els = document.getElementsByClassName("chair");
+
+			Array.from(els).forEach((el) => {
+				// Do stuff here
+				//console.log(el.id);
+				el.addEventListener('click', function(e) {
+					//avatarClicked = networkedComponent.creator;
+					//console.log(el.id);
+					currentChair = el.id;
+					$('.chair-actions').addClass('show');
+					$('.chair-actions').css({top: cursorY, left: cursorX});
+				});
+			});			
+		
+			//Set player animation
+			var player = document.getElementById('player');		
+
+			//Set player collisions
+			player.setAttribute('ammo-body', 'type:kinematic; emitCollisionEvents: true;');
+			//player.setAttribute('ammo-shape', 'type: box; fit: manual; halfExtents: 0.3 1 2.5; offset: 0 0 2.5;');
+			//ammo-body="type: kinematic; emitCollisionEvents: true;" ammo-shape="type:box" 
+			
+			player.addEventListener('collidestart', function(e) {
+				console.log('Collided start');
+                console.log(e.detail.targetEl);
+                let s = document.getElementById('scene');
+                e.detail.targetEl.setAttribute('model-opacity', '0.2');
+				if (e.detail.targetEl.getAttribute('id') === 'demo-sphere') {
+                    if (currDemoStep === 3) {
+                        s.removeChild(e.detail.targetEl);
+                        currDemoStep++;                        
+                    }
+                } else if (e.detail.targetEl.getAttribute('id') == 'demo-box') {
+                    if (currDemoStep === 5) {
+                        s.removeChild(e.detail.targetEl);
+                        currDemoStep++;                        
+                    }
+                } else if (e.detail.targetEl.getAttribute('id') === 'demo-cone') {
+                    if (currDemoStep === 6) {
+                        s.removeChild(e.detail.targetEl);
+                        currDemoStep++;                        
+                    }
+                } else if (e.detail.targetEl.getAttribute('id') === 'door') {
+                    if (currDemoStep === 7) {
+                        currDemoStep++;                        
+                    }
+                } 
+                nextDemoStep(currDemoStep);
+			});
+
+			player.addEventListener('collideend', function(e) {
+				console.log('Collided End');
+				console.log(e.detail.targetEl);
+                if (e.detail.targetEl.getAttribute('id') === 'door') {
+                    if (currDemoStep === 4) {
+                        currDemoStep++;
+                        nextDemoStep(currDemoStep);
+                    }
+                }
+				e.detail.targetEl.setAttribute('model-opacity', '1');
+			});
+			
+			wavingBtnEl.addEventListener('click', function() {
+				//player.setAttribute('animation-mixer', 'clip', 'waving');
+				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				//if (sitFlag == "Y") {
+				if (state.sit) {
+					player.setAttribute('animation-mixer', 'clip', 'sittingcheer');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 4000);
+				} else {				
+					player.setAttribute('animation-mixer', 'clip', 'waving');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				}
+			});
+
+			raiseHandBtnEl.addEventListener('click', function() {
+				//player.setAttribute('animation-mixer', 'clip', 'handraising');
+				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				//if (sitFlag == "Y") {
+				if (state.sit) {
+					player.setAttribute('animation-mixer', 'clip', 'sittingraise');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 3000);
+				} else {		
+					player.setAttribute('animation-mixer', 'clip', 'handraising');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				}
+			});
+			
+			clapHandBtnEl.addEventListener('click', function() {
+				//player.setAttribute('animation-mixer', 'clip', 'clapping');
+				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				//if (sitFlag == "Y") {
+				if (state.sit) {
+					player.setAttribute('animation-mixer', 'clip', 'sittingclap');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 3000);
+				} else {		
+					player.setAttribute('animation-mixer', 'clip', 'clapping');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				}
+			});
+			
+			yesBtnEl.addEventListener('click', function() {
+				//player.setAttribute('animation-mixer', 'clip', 'yes');
+				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				//if (sitFlag == "Y") {
+				if (state.sit) {
+					player.setAttribute('animation-mixer', 'clip', 'sittingyes');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 3000);
+				} else {		
+					player.setAttribute('animation-mixer', 'clip', 'yes');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3500);
+				}
+			});
+			
+			noBtnEl.addEventListener('click', function() {
+				//player.setAttribute('animation-mixer', 'clip', 'no');
+				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				//if (sitFlag == "Y") {
+				if (state.sit) {
+					player.setAttribute('animation-mixer', 'clip', 'sittingno');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 3800);
+				} else {		
+					player.setAttribute('animation-mixer', 'clip', 'no');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 4000);
+				}
+			});
+			
+			gangnamBtnEl.addEventListener('click', function() {
+				//player.setAttribute('animation-mixer', 'clip', 'gangnam');
+				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				//if (sitFlag == "Y") {
+				if (state.sit) {
+					//player.setAttribute('animation-mixer', 'clip', 'gangnam');
+					//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 10000);
+				} else {		
+					player.setAttribute('animation-mixer', 'clip', 'gangnam');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 12500);
+				}
+			});
+			
+			hiphopBtnEl.addEventListener('click', function() {
+				//player.setAttribute('animation-mixer', 'clip', 'hiphop');
+				//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 3000);
+				//if (sitFlag == "Y") {
+				if (state.sit) {
+					//player.setAttribute('animation-mixer', 'clip', 'hiphop');
+					//setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'sittingidle');	}, 10000);
+				} else {		
+					player.setAttribute('animation-mixer', 'clip', 'hiphop');
+					setTimeout(function() { player.setAttribute('animation-mixer', 'clip', 'idle');	}, 17500);
+				}
+			});
+			
+			sitdownBtnEl.addEventListener('click', function(e) {
+				if (chairs[currentChair]["user"] == "") {
+					//clearInterval(sitRefreshIntervalId);
+					//if (sitFlag == "Y") {
+					if (state.sit) {
+						leaveChair();
+					}
+					
+					//sitFlag = "Y";
+					state.sit = true;
+					
+					//console.log('chairs sit: ' + JSON.stringify(chairs));
+					
+					var chairPosition = document.getElementById(currentChair);
+					//console.log("currentChair: ", currentChair);
+					var pos = chairPosition.getAttribute('position');
+					
+					//console.log("pos: ", pos);
+					
+					var newX = pos.x+0.15;
+					var newY = pos.y+0.35;
+					var newZ = pos.z;
+					teleportTo(newX+' '+newY+' '+newZ);
+					
+					var p = document.getElementById('player');
+					p.setAttribute('animation-mixer', 'clip', 'sittingidle');
+					p.components["look-controls"].pitchObject.rotation.x = 0.15;
+					p.components["look-controls"].yawObject.rotation.y = chairs[currentChair]["yaxis"];
+					//console.log("chairs[currentChair][yaxis]: ", chairs[currentChair]["yaxis"]);
+					
+					var c = document.getElementById('cam');
+					c.setAttribute('position', '0 ' + sitdownEyeLevel + ' 0');
+					
+					var c = document.getElementById(currentChair);
+					sitRefreshIntervalId = setInterval(function () { 
+											var playerAvatarRotation = p.getAttribute('rotation');
+											//console.log("playerAvatarRotation: ", playerAvatarRotation);
+											//c.setAttribute('rotation', 'y', playerAvatarRotation.y-180);
+											//secondaryCamera.object3D.rotation.copy('90 90 90');
+											//console.log("secondaryCamera: ", secondaryCamera.getAttribute('position'));
+											if (chairYAxis != playerAvatarRotation.y-180) {
+												c.setAttribute('rotation', 'y', playerAvatarRotation.y-180);
+												//console.log("chairRotate broadcastData");												
+											}
+											chairYAxis = playerAvatarRotation.y-180;
+										}, 10);
+				}
+			});
+			
+			document.getElementById("spectatorDiv").style.display = "none";
+	
+
+			mapModeBtnEl.addEventListener('click', function() {
+				
+				if (mapFixedModeFlag == 'Y' ) {					
+					mapNonFixedMode();
+					mapFixedModeFlag = 'N';
+					mapModeBtnEl.textContent = "Switch to Room Centric Mode";
+				} else if (mapFixedModeFlag == 'N' ) {
+					clearInterval(refreshIntervalId);
+					mapFixedMode();
+					mapFixedModeFlag = 'Y';
+					mapModeBtnEl.textContent = "Switch to Player Centric Mode";
+				}
+					
+			});
+						
+			document.getElementById("spectatorScreenDiv").style.display = "none";
+			
+			document.addEventListener('keydown', function(evt) {
+				if (evt.keyCode === 87 || evt.keyCode === 65 || evt.keyCode === 83 || evt.keyCode === 68 || evt.keyCode ===38 || evt.keyCode === 37 || evt.keyCode === 39 || evt.keyCode === 40) {
+					//if (sitFlag == "Y") {
+					if (state.sit) {
+						leaveChair();
+					}
+					
+					player.setAttribute('animation-mixer', 'clip', 'walking');
+					//var c = document.getElementById('cam');
+					//c.setAttribute('position', '0 2.6 0');
+					//clearInterval(sitRefreshIntervalId);					
+				}
+			});
+			
+			document.addEventListener('keyup', function(evt) {
+				if (evt.keyCode === 87 || evt.keyCode === 65 || evt.keyCode === 83 || evt.keyCode === 68 || evt.keyCode ===38 || evt.keyCode === 37 || evt.keyCode === 39 || evt.keyCode === 40) {
+					//if (sitFlag == "Y") {
+					if (state.sit) {
+						leaveChair();
+					}
+					
+					player.setAttribute('animation-mixer', 'clip', 'idle');
+					//var c = document.getElementById('cam');
+					//c.setAttribute('position', '0 2.6 0');
+					//clearInterval(sitRefreshIntervalId);					
+				}
+				if (evt.keyCode === 49) {					
+					wavingBtnEl.click();					
+				}
+
+				if (evt.keyCode === 50) {					
+					raiseHandBtnEl.click();
+				}	
+
+				if (evt.keyCode === 51) {				
+					clapHandBtnEl.click();
+				}	
+				
+				if (evt.keyCode === 52) {					
+					gangnamBtnEl.click();
+				}	
+				
+				if (evt.keyCode === 53) {					
+					hiphopBtnEl.click();
+				}	
+
+				if (evt.keyCode === 89) {					
+					yesBtnEl.click();
+				}	
+				
+				if (evt.keyCode === 78) {					
+					noBtnEl.click();
+				}	
+			});
+			//End set player animation
+			
+			document.addEventListener('wheel', function(evt) {
+				if (frontView == 'N') {
+					if (evt.deltaY < 0)
+					{
+						//console.log('scrolling up');
+						scrollingUp = 'Y';
+						viewpointBtnEl.click();
+					}
+					else if (evt.deltaY > 0)
+					{
+						//console.log('scrolling down');
+						scrollingDown = 'Y';
+						viewpointBtnEl.click();
+					}
+				}
+            });
+		});				
+
+		$(window).on('click', e => {			
+			const target = e.target
+			//console.log('click');
+			//console.log(target);
+			if (target.matches('.a-mouse-cursor-hover')) {
+				//When click on the avatar, there would be 3 events
+				//First event is from a-scene
+				//Then from the avatar which the class=head
+				//Last from canvas with class a-canvas, a-grab-cursor and a-mouse-cursor-hover
+				//Seems the a-mouse-cursor-hover only exists when click the avatar
+				//To remove the 'show' class on the avatar actions, ignore the a-mouse-cursor-hover event
+				return;
+			}  							
+			
+			if (!target.matches('.head') && !target.matches('.participant_photo')) {
+				if ($('.ava-actions').hasClass('show')) {
+					$('.ava-actions').removeClass('show')
+				}				
+			}
+			/*
+			if (target.matches('.greetings-btn')) { 
+    			return $('.g-btn').toggleClass('show');
+			}			 
+			*/
+  			if (!target.matches('[data-inside]')) { 
+    			$('.g-btn').removeClass('show');
+			}
+
+			if (!target.matches('.chair')) {
+				$('.chair-actions').removeClass('show');
+			}
+		});
+
+		$(window).on('mousedown', e => {			
+			if (e.pageX != 'undefined' || e.clientX != 'undefined') {
+				if (e.pageX == null && e.clientX != null) {
+					cursorX = e.clientX;
+					cursorY = e.clientY;
+				} else if (e.pageX != null) {
+					cursorX = e.pageX;
+					cursorY = e.pageY;
+				}
+			}			  
+		});
+	</script>
+  </body>
+</html>

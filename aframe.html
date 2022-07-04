@@ -1046,331 +1046,342 @@
 		}
 
 		document.addEventListener('DOMContentLoaded', () => {
-			console.log('DOMContentLoaded');						
-			//console.log(params);			
-			setup(params);
-			setAvatar(params);
-			
-			const stopAndRemoveVideoTrack = async () => {				
-				const videoTracks = state.currentStream.getVideoTracks();
-				if (videoTracks.length > 0) {
-					videoTracks[0].stop();
-					state.currentStream.removeTrack(videoTracks[0]);
-					await NAF.connection.adapter.setLocalMediaStream(state.currentStream);
-				}				
-			};
-
-			selectPmTargetEl.addEventListener('change', function() {
-				//console.log(this.value);
-				//console.log(this.options[this.selectedIndex].text);
-				avatarClicked = this.value;
-				setPM(this.options[this.selectedIndex].text, this.value);
-			});
-
-			//Handle sending chat text
-			sendTextBtnEl.addEventListener('click', function() {
-				var messageInput = document.getElementById("message-input");
-				var chatMessages = document.getElementById("chat-messages");
-				chatMessages.innerHTML += '<p style="color:black"> ' + getUserDisplayName() + ": " + messageInput.value + '</p>';
-				chatMessages.scrollTop = chatMessages.scrollHeight;				
-				NAF.connection.adapter.broadcastData("chat", {txt: messageInput.value, sender: getUserDisplayName(), senderId: NAF.clientId});
-				messageInput.value = "";
-			});
-
-			//Handle to mute or un-mute
-			audioBtnEl.addEventListener('click', function() {
-				state.audioEnabled = !state.audioEnabled;		
-				var participantName = document.getElementById(NAF.clientId + "_name");
-				NAF.connection.adapter.enableMicrophone(state.audioEnabled);				
+			console.log('DOMContentLoaded');	
+			console.log(params.room);
+			console.log(params.corpid);
+			console.log(window.sessionStorage.getItem('r'));
+			console.log(window.sessionStorage.getItem('u'));
+			if (window.sessionStorage.getItem('r') === null || window.sessionStorage.getItem('u') === null || window.sessionStorage.getItem('r') !== params.room || window.sessionStorage.getItem('u') !== params.corpid) {
+				window.location.href = "/";
+				//console.log('sessionStorage not found or not match');
+			} else {					
+				//console.log(params);			
+				window.sessionStorage.clear();
+				setup(params);
+				setAvatar(params);
 				
-				if (state.audioEnabled) {										
-					//audioBtnEl.textContent = 'Un-Mute';
-					$('#mic-icon').removeClass("bi-mic-mute");
-					$('#mic-icon').addClass("bi-mic");
-					$('#audio-btn').removeClass('btn-success');
-					$('#audio-btn').addClass('btn-primary');
-					$('#audio-text').text(' Mute');
-					var mute_icon = document.getElementById(NAF.clientId + "_mute_icon");
-					participantName.removeChild(mute_icon);						
-				} else {					
-					//audioBtnEl.textContent = 'Mute';
-					$('#mic-icon').removeClass("bi-mic");
-					$('#mic-icon').addClass("bi-mic-mute");
-					$('#audio-btn').removeClass('btn-primary');
-					$('#audio-btn').addClass('btn-success');
-					$('#audio-text').text(' Un-Mute');
-					/*
-					var mute = document.createElement('img');
-					mute.setAttribute('id', NAF.clientId + '_mute_icon');
-					mute.setAttribute('width', 16);
-					mute.setAttribute('height', 16);
-					mute.setAttribute('src', 'images/mute.png');
-					*/
-					var mute = document.createElement('i');
-					mute.setAttribute('id', NAF.clientId + '_mute_icon');
-					mute.setAttribute('class', 'bi bi-mic-mute');
-					mute.setAttribute('style', 'font-size:1.5rem;color:red;')
-					participantName.appendChild(mute);
-					NAF.connection.adapter.broadcastData("talking", {muteStatus: true, vol: 0, sender: getUserCorpId(), senderId: NAF.clientId});
-					setVolLED(0, NAF.clientId);					
-				}						
-			});
+				const stopAndRemoveVideoTrack = async () => {				
+					const videoTracks = state.currentStream.getVideoTracks();
+					if (videoTracks.length > 0) {
+						videoTracks[0].stop();
+						state.currentStream.removeTrack(videoTracks[0]);
+						await NAF.connection.adapter.setLocalMediaStream(state.currentStream);
+					}				
+				};
 
-			chatTextBtnEl.addEventListener('click', function() {				
-				if ($('#chat-text-icon').hasClass('bi-chat-text')) {
-					$('#chat-text-icon').removeClass('bi-chat-text');
-					$('#chat-text-icon').addClass('bi-chat-text-fill');
-					$('#chat-text-btn').removeClass('btn-primary');
-					$('#chat-text-btn').addClass('btn-success');
-				} else {
-					$('#chat-text-icon').removeClass('bi-chat-text-fill');
-					$('#chat-text-icon').addClass('bi-chat-text');
-					$('#chat-text-btn').removeClass('btn-success');
-					$('#chat-text-btn').addClass('btn-primary');
-				}
-				$('#chatUI').toggleClass('show');
-			});
+				selectPmTargetEl.addEventListener('change', function() {
+					//console.log(this.value);
+					//console.log(this.options[this.selectedIndex].text);
+					avatarClicked = this.value;
+					setPM(this.options[this.selectedIndex].text, this.value);
+				});
 
-			// Handle camera button click (Show and Hide)
-			/*
-			cameraBtnEl.addEventListener('click', async () => {				
-				if (state.cameraEnabled) {
-					$('#cam-icon').removeClass("bi-camera-fill");
-					$('#cam-icon').addClass("bi-camera");
-					await stopAndRemoveVideoTrack();
-					var camEl = document.querySelector('.share_screen');
-					if (camEl != undefined) {
-						scene.removeChild(camEl);
-					}					
-				} else {
-					$('#cam-icon').removeClass("bi-camera");
-					$('#cam-icon').addClass("bi-camera-fill");
-					const stream = await navigator.mediaDevices.getUserMedia(
-						{video: {mediaSource: "camera",
-							width: {max: 1280, ideal: 640},
-							height: {ideal: 360},
-							frameRate: 30}});					
-					state.currentStream.addTrack(stream.getVideoTracks()[0]);
-					await NAF.connection.adapter.setLocalMediaStream(state.currentStream);
+				//Handle sending chat text
+				sendTextBtnEl.addEventListener('click', function() {
+					var messageInput = document.getElementById("message-input");
+					var chatMessages = document.getElementById("chat-messages");
+					chatMessages.innerHTML += '<p style="color:black"> ' + getUserDisplayName() + ": " + messageInput.value + '</p>';
+					chatMessages.scrollTop = chatMessages.scrollHeight;				
+					NAF.connection.adapter.broadcastData("chat", {txt: messageInput.value, sender: getUserDisplayName(), senderId: NAF.clientId});
+					messageInput.value = "";
+				});
+
+				//Handle to mute or un-mute
+				audioBtnEl.addEventListener('click', function() {
+					state.audioEnabled = !state.audioEnabled;		
+					var participantName = document.getElementById(NAF.clientId + "_name");
+					NAF.connection.adapter.enableMicrophone(state.audioEnabled);				
 					
-					var el = document.createElement('a-entity');
-					el.setAttribute('class', 'scr');
-					el.setAttribute('networked', 'template:#share-screen-template');					
-					scene.appendChild(el);
-				}			
-				screenBtnEl.disabled = !state.cameraEnabled;
-				state.cameraEnabled = !state.cameraEnabled;
-				//cameraBtnEl.textContent = state.cameraEnabled ? 'Hide Camera' : 'Show Camera';								
-				NAF.connection.adapter.broadcastData("streaming", {camStatus: state.cameraEnabled, screenStatus: state.screenEnabled, sender: getUserCorpId(), senderId: NAF.clientId});
-			});
-			*/
+					if (state.audioEnabled) {										
+						//audioBtnEl.textContent = 'Un-Mute';
+						$('#mic-icon').removeClass("bi-mic-mute");
+						$('#mic-icon').addClass("bi-mic");
+						$('#audio-btn').removeClass('btn-success');
+						$('#audio-btn').addClass('btn-primary');
+						$('#audio-text').text(' Mute');
+						var mute_icon = document.getElementById(NAF.clientId + "_mute_icon");
+						participantName.removeChild(mute_icon);						
+					} else {					
+						//audioBtnEl.textContent = 'Mute';
+						$('#mic-icon').removeClass("bi-mic");
+						$('#mic-icon').addClass("bi-mic-mute");
+						$('#audio-btn').removeClass('btn-primary');
+						$('#audio-btn').addClass('btn-success');
+						$('#audio-text').text(' Un-Mute');
+						/*
+						var mute = document.createElement('img');
+						mute.setAttribute('id', NAF.clientId + '_mute_icon');
+						mute.setAttribute('width', 16);
+						mute.setAttribute('height', 16);
+						mute.setAttribute('src', 'images/mute.png');
+						*/
+						var mute = document.createElement('i');
+						mute.setAttribute('id', NAF.clientId + '_mute_icon');
+						mute.setAttribute('class', 'bi bi-mic-mute');
+						mute.setAttribute('style', 'font-size:1.5rem;color:red;')
+						participantName.appendChild(mute);
+						NAF.connection.adapter.broadcastData("talking", {muteStatus: true, vol: 0, sender: getUserCorpId(), senderId: NAF.clientId});
+						setVolLED(0, NAF.clientId);					
+					}						
+				});
 
-			screenBtnEl.addEventListener('click', async () => {
-				if (state.screenEnabled) {
-					$('#screen-icon').removeClass("bi-tv-fill");
-					$('#screen-icon').addClass("bi-tv");
-					$('#screen-btn').removeClass('btn-success');
-					$('#screen-btn').addClass('btn-primary');
-					$('#screen-text').text(' Share Screen');
-					await stopAndRemoveVideoTrack();
-					var screenEl = document.querySelector('.share_screen');
-					if (screenEl != undefined) {
-						scene.removeChild(screenEl);
+				chatTextBtnEl.addEventListener('click', function() {				
+					if ($('#chat-text-icon').hasClass('bi-chat-text')) {
+						$('#chat-text-icon').removeClass('bi-chat-text');
+						$('#chat-text-icon').addClass('bi-chat-text-fill');
+						$('#chat-text-btn').removeClass('btn-primary');
+						$('#chat-text-btn').addClass('btn-success');
+					} else {
+						$('#chat-text-icon').removeClass('bi-chat-text-fill');
+						$('#chat-text-icon').addClass('bi-chat-text');
+						$('#chat-text-btn').removeClass('btn-success');
+						$('#chat-text-btn').addClass('btn-primary');
 					}
-				} else {
-					$('#screen-icon').removeClass("bi-tv");
-					$('#screen-icon').addClass("bi-tv-fill");
-					$('#screen-btn').removeClass('btn-primary');
-					$('#screen-btn').addClass('btn-success');
-					$('#screen-text').text(' Stop Share');
-					navigator.mediaDevices.getDisplayMedia({video: true}).then((stream) => {						
-						state.currentStream.addTrack(stream.getVideoTracks()[0]);
-						NAF.connection.adapter.setLocalMediaStream(state.currentStream);
-					});
+					$('#chatUI').toggleClass('show');
+				});
 
-					var el = document.createElement('a-entity');
-					el.setAttribute('class', 'scr');
-					el.setAttribute('networked', 'template:#share-screen-template');	
+				// Handle camera button click (Show and Hide)
+				/*
+				cameraBtnEl.addEventListener('click', async () => {				
+					if (state.cameraEnabled) {
+						$('#cam-icon').removeClass("bi-camera-fill");
+						$('#cam-icon').addClass("bi-camera");
+						await stopAndRemoveVideoTrack();
+						var camEl = document.querySelector('.share_screen');
+						if (camEl != undefined) {
+							scene.removeChild(camEl);
+						}					
+					} else {
+						$('#cam-icon').removeClass("bi-camera");
+						$('#cam-icon').addClass("bi-camera-fill");
+						const stream = await navigator.mediaDevices.getUserMedia(
+							{video: {mediaSource: "camera",
+								width: {max: 1280, ideal: 640},
+								height: {ideal: 360},
+								frameRate: 30}});					
+						state.currentStream.addTrack(stream.getVideoTracks()[0]);
+						await NAF.connection.adapter.setLocalMediaStream(state.currentStream);
+						
+						var el = document.createElement('a-entity');
+						el.setAttribute('class', 'scr');
+						el.setAttribute('networked', 'template:#share-screen-template');					
+						scene.appendChild(el);
+					}			
+					screenBtnEl.disabled = !state.cameraEnabled;
+					state.cameraEnabled = !state.cameraEnabled;
+					//cameraBtnEl.textContent = state.cameraEnabled ? 'Hide Camera' : 'Show Camera';								
+					NAF.connection.adapter.broadcastData("streaming", {camStatus: state.cameraEnabled, screenStatus: state.screenEnabled, sender: getUserCorpId(), senderId: NAF.clientId});
+				});
+				*/
+
+				screenBtnEl.addEventListener('click', async () => {
+					if (state.screenEnabled) {
+						$('#screen-icon').removeClass("bi-tv-fill");
+						$('#screen-icon').addClass("bi-tv");
+						$('#screen-btn').removeClass('btn-success');
+						$('#screen-btn').addClass('btn-primary');
+						$('#screen-text').text(' Share Screen');
+						await stopAndRemoveVideoTrack();
+						var screenEl = document.querySelector('.share_screen');
+						if (screenEl != undefined) {
+							scene.removeChild(screenEl);
+						}
+					} else {
+						$('#screen-icon').removeClass("bi-tv");
+						$('#screen-icon').addClass("bi-tv-fill");
+						$('#screen-btn').removeClass('btn-primary');
+						$('#screen-btn').addClass('btn-success');
+						$('#screen-text').text(' Stop Share');
+						navigator.mediaDevices.getDisplayMedia({video: true}).then((stream) => {						
+							state.currentStream.addTrack(stream.getVideoTracks()[0]);
+							NAF.connection.adapter.setLocalMediaStream(state.currentStream);
+						});
+
+						var el = document.createElement('a-entity');
+						el.setAttribute('class', 'scr');
+						el.setAttribute('networked', 'template:#share-screen-template');	
+						
+						scene.appendChild(el);										
+					}
+					//cameraBtnEl.disabled = !state.screenEnabled;
+					state.screenEnabled = !state.screenEnabled;
+					//screenBtnEl.textContent = state.screenEnabled ? 'Stop Screen Share' : 'Start Screen Share';
 					
-					scene.appendChild(el);										
-				}
-				//cameraBtnEl.disabled = !state.screenEnabled;
-				state.screenEnabled = !state.screenEnabled;
-				//screenBtnEl.textContent = state.screenEnabled ? 'Stop Screen Share' : 'Start Screen Share';
+					NAF.connection.adapter.broadcastData("streaming", {camStatus: state.cameraEnabled, screenStatus: state.screenEnabled, sender: playerInfo.nickname, senderId: NAF.clientId});
+				});
 				
-				NAF.connection.adapter.broadcastData("streaming", {camStatus: state.cameraEnabled, screenStatus: state.screenEnabled, sender: playerInfo.nickname, senderId: NAF.clientId});
-			});
-			
-			helpBtnEl.addEventListener('click', function() {
-				if ($('#help-icon').hasClass('bi-question-circle')) {
-					$('#help-icon').removeClass('bi-question-circle');
-					$('#help-icon').addClass('bi-question-circle-fill');
-					$('#help-btn').removeClass('btn-primary');
-					$('#help-btn').addClass('btn-success');
-				} else {
-					$('#help-icon').removeClass('bi-question-circle-fill');
-					$('#help-icon').addClass('bi-question-circle');
-					$('#help-btn').removeClass('btn-success');
-					$('#help-btn').addClass('btn-primary');
-				}
-				$('#helpDiv').toggleClass('show');
-			});
-			
-			viewpointFrontBtnEl.addEventListener('click', function() {
-				//Add class preventCamInactive on camera to prevent it inactive when other camera set to active
-				//var secondaryCam = document.getElementById('secondaryCam');
-				//secondaryCam.classList.add("preventCamInactive");
-				//var screenCam = document.getElementById('screenCam');
-				//screenCam.classList.add("preventCamInactive");
+				helpBtnEl.addEventListener('click', function() {
+					if ($('#help-icon').hasClass('bi-question-circle')) {
+						$('#help-icon').removeClass('bi-question-circle');
+						$('#help-icon').addClass('bi-question-circle-fill');
+						$('#help-btn').removeClass('btn-primary');
+						$('#help-btn').addClass('btn-success');
+					} else {
+						$('#help-icon').removeClass('bi-question-circle-fill');
+						$('#help-icon').addClass('bi-question-circle');
+						$('#help-btn').removeClass('btn-success');
+						$('#help-btn').addClass('btn-primary');
+					}
+					$('#helpDiv').toggleClass('show');
+				});
 				
-				if (frontView == 'N') {
-					//console.log("frontView = N");
-					$('#viewpointFront-btn').removeClass('btn-primary');
-					$('#viewpointFront-btn').addClass('btn-success');
-					frontView = 'Y';
-					var camBack = document.getElementById('camBack');
-					//var playerCam = document.getElementById('cam');
-					//playerCam.setAttribute('camera', 'active', false);
-					camBack.setAttribute('camera', 'active', true);
-					directionDegree = 180;
-					camBack.setAttribute('wasd-controls', 'acceleration: 27; adInverted: true; wsInverted: true;');					
-					clearInterval(backCamRefreshIntervalId);
-					backCamRefreshIntervalId = setInterval(function () { 
-																var p = document.getElementById('player');
-																var pp = p.getAttribute('position');
-																var pr = p.getAttribute('rotation');
-																var yDegree = ((pr.y % 360) + directionDegree) % 360;
-																camBack.setAttribute('position', { x: pp.x + Math.sin(yDegree * (Math.PI / 180)) * 5, y: pp.y + 3, z: pp.z + Math.cos(yDegree * (Math.PI / 180)) * 5});	
-																camBack.components["look-controls"].pitchObject.rotation.x = p.components["look-controls"].pitchObject.rotation.x;
-																camBack.components["look-controls"].yawObject.rotation.y = p.components["look-controls"].yawObject.rotation.y + 9.4;
-															}, 5);
+				viewpointFrontBtnEl.addEventListener('click', function() {
+					//Add class preventCamInactive on camera to prevent it inactive when other camera set to active
+					//var secondaryCam = document.getElementById('secondaryCam');
+					//secondaryCam.classList.add("preventCamInactive");
+					//var screenCam = document.getElementById('screenCam');
+					//screenCam.classList.add("preventCamInactive");
 					
-					var playerCollision = document.getElementById('player');	
-					playerCollision.removeAttribute('ammo-shape');
-					playerCollision.setAttribute('ammo-shape', 'type: box; fit: manual; halfExtents: 0.3 1 2.5; offset:0 0 -2.5');
-				} else {
+					if (frontView == 'N') {
+						//console.log("frontView = N");
+						$('#viewpointFront-btn').removeClass('btn-primary');
+						$('#viewpointFront-btn').addClass('btn-success');
+						frontView = 'Y';
+						var camBack = document.getElementById('camBack');
+						//var playerCam = document.getElementById('cam');
+						//playerCam.setAttribute('camera', 'active', false);
+						camBack.setAttribute('camera', 'active', true);
+						directionDegree = 180;
+						camBack.setAttribute('wasd-controls', 'acceleration: 27; adInverted: true; wsInverted: true;');					
+						clearInterval(backCamRefreshIntervalId);
+						backCamRefreshIntervalId = setInterval(function () { 
+																	var p = document.getElementById('player');
+																	var pp = p.getAttribute('position');
+																	var pr = p.getAttribute('rotation');
+																	var yDegree = ((pr.y % 360) + directionDegree) % 360;
+																	camBack.setAttribute('position', { x: pp.x + Math.sin(yDegree * (Math.PI / 180)) * 5, y: pp.y + 3, z: pp.z + Math.cos(yDegree * (Math.PI / 180)) * 5});	
+																	camBack.components["look-controls"].pitchObject.rotation.x = p.components["look-controls"].pitchObject.rotation.x;
+																	camBack.components["look-controls"].yawObject.rotation.y = p.components["look-controls"].yawObject.rotation.y + 9.4;
+																}, 5);
+						
+						var playerCollision = document.getElementById('player');	
+						playerCollision.removeAttribute('ammo-shape');
+						playerCollision.setAttribute('ammo-shape', 'type: box; fit: manual; halfExtents: 0.3 1 2.5; offset:0 0 -2.5');
+					} else {
+						$('#viewpointFront-btn').removeClass('btn-success');
+						$('#viewpointFront-btn').addClass('btn-primary');
+						//console.log("frontView = Y");
+						clearInterval(backCamRefreshIntervalId);
+						//frontView = 'N';
+						viewpointBtnEl.click();
+					}
+				});
+				
+				viewpointBtnEl.addEventListener('click', function() {
+					//console.log("testBtnEl click! ");
+					//var secondaryCam = document.getElementById('secondaryCam');
+					//secondaryCam.classList.add("preventCamInactive");
+					//var screenCam = document.getElementById('screenCam');
+					//screenCam.classList.add("preventCamInactive");
+									
+					if (frontView == 'N') {
+						if (scrollingUp == 'Y') {
+							camFlag = camFlag - 1;
+							
+							if (camFlag < 0) {
+								camFlag = 0;
+							}
+							
+							scrollingUp = 'N';
+						} else if (scrollingDown == 'Y') {
+							camFlag = camFlag + 1;
+							
+							if (camFlag > 2) {
+								camFlag = 2;
+							}
+							
+							scrollingDown = 'N';
+						} else {
+							camFlag = (camFlag + 1) % 3;
+						}
+					}				
+					frontView = 'N';
 					$('#viewpointFront-btn').removeClass('btn-success');
 					$('#viewpointFront-btn').addClass('btn-primary');
-					//console.log("frontView = Y");
-					clearInterval(backCamRefreshIntervalId);
-					//frontView = 'N';
-					viewpointBtnEl.click();
-				}
-			});
-			
-			viewpointBtnEl.addEventListener('click', function() {
-				//console.log("testBtnEl click! ");
-				//var secondaryCam = document.getElementById('secondaryCam');
-				//secondaryCam.classList.add("preventCamInactive");
-				//var screenCam = document.getElementById('screenCam');
-				//screenCam.classList.add("preventCamInactive");
-								
-				if (frontView == 'N') {
-					if (scrollingUp == 'Y') {
-						camFlag = camFlag - 1;
+
+					var camBack = document.getElementById('camBack');
+					var playerCam = document.getElementById('cam');
+					var distance;
+					var playerCollision = document.getElementById('player');	
+					var viewIcon = document.getElementById('viewpoint-icon');
+									
+					if (camFlag !== 0 ) {		
+						//playerCam.setAttribute('camera', 'active', false);
+						camBack.setAttribute('camera', 'active', true);
+						directionDegree = 360;
 						
-						if (camFlag < 0) {
-							camFlag = 0;
+						if (camFlag == 1) {
+							$('#change-view-text').text('Viewport 1');
+							viewIcon.setAttribute('style', 'font-size: 1rem;');
+							distance = 2.5;
+
+							playerCollision.removeAttribute('ammo-shape');
+							playerCollision.setAttribute('ammo-shape', 'type: box; fit: manual; halfExtents: 0.3 1 1.25; offset:0 0 1.25');
 						}
-						
-						scrollingUp = 'N';
-					} else if (scrollingDown == 'Y') {
-						camFlag = camFlag + 1;
-						
-						if (camFlag > 2) {
-							camFlag = 2;
+						if (camFlag == 2) {
+							$('#change-view-text').text('Viewport 2');
+							viewIcon.setAttribute('style', 'font-size: 0.8rem;');
+							distance = 5;
+
+							playerCollision.removeAttribute('ammo-shape');
+							playerCollision.setAttribute('ammo-shape', 'type: box; fit: manual; halfExtents: 0.3 1 2.5; offset:0 0 2.5');
 						}
+						camBack.setAttribute('wasd-controls', 'acceleration: 27;');
+						clearInterval(backCamRefreshIntervalId);
+						backCamRefreshIntervalId = setInterval(function () { 
+																	var p = document.getElementById('player');
+																	var pp = p.getAttribute('position');
+																	var pr = p.getAttribute('rotation');
+																	var yDegree = ((pr.y % 360) + directionDegree) % 360;
+																	camBack.setAttribute('position', { x: pp.x + Math.sin(yDegree * (Math.PI / 180)) * distance, y: pp.y + 3, z: pp.z + Math.cos(yDegree * (Math.PI / 180)) * distance});	
+																	camBack.components["look-controls"].pitchObject.rotation.x = p.components["look-controls"].pitchObject.rotation.x;
+																	camBack.components["look-controls"].yawObject.rotation.y = p.components["look-controls"].yawObject.rotation.y;
+																}, 5);
+					} else if (camFlag == 0 ) {
+						$('#change-view-text').text('Main View');
+						viewIcon.setAttribute('style', 'font-size: 1.2rem;');
+						clearInterval(backCamRefreshIntervalId);
+						//camBack.setAttribute('camera', 'active', false);
+						playerCam.setAttribute('camera', 'active', true);
 						
-						scrollingDown = 'N';
-					} else {
-						camFlag = (camFlag + 1) % 3;
+						var playerAmmo = document.getElementById('player');	
+						playerAmmo.removeAttribute('ammo-shape');
 					}
-				}				
-				frontView = 'N';
-				$('#viewpointFront-btn').removeClass('btn-success');
-				$('#viewpointFront-btn').addClass('btn-primary');
+				});
 
-				var camBack = document.getElementById('camBack');
-				var playerCam = document.getElementById('cam');
-				var distance;
-				var playerCollision = document.getElementById('player');	
-				var viewIcon = document.getElementById('viewpoint-icon');
-								
-				if (camFlag !== 0 ) {		
-					//playerCam.setAttribute('camera', 'active', false);
-					camBack.setAttribute('camera', 'active', true);
-					directionDegree = 360;
-					
-					if (camFlag == 1) {
-						$('#change-view-text').text('Viewport 1');
-						viewIcon.setAttribute('style', 'font-size: 1rem;');
-						distance = 2.5;
-
-						playerCollision.removeAttribute('ammo-shape');
-						playerCollision.setAttribute('ammo-shape', 'type: box; fit: manual; halfExtents: 0.3 1 1.25; offset:0 0 1.25');
-					}
-					if (camFlag == 2) {
-						$('#change-view-text').text('Viewport 2');
-						viewIcon.setAttribute('style', 'font-size: 0.8rem;');
-						distance = 5;
-
-						playerCollision.removeAttribute('ammo-shape');
-						playerCollision.setAttribute('ammo-shape', 'type: box; fit: manual; halfExtents: 0.3 1 2.5; offset:0 0 2.5');
-					}
-					camBack.setAttribute('wasd-controls', 'acceleration: 27;');
-					clearInterval(backCamRefreshIntervalId);
-					backCamRefreshIntervalId = setInterval(function () { 
-																var p = document.getElementById('player');
-																var pp = p.getAttribute('position');
-																var pr = p.getAttribute('rotation');
-																var yDegree = ((pr.y % 360) + directionDegree) % 360;
-																camBack.setAttribute('position', { x: pp.x + Math.sin(yDegree * (Math.PI / 180)) * distance, y: pp.y + 3, z: pp.z + Math.cos(yDegree * (Math.PI / 180)) * distance});	
-																camBack.components["look-controls"].pitchObject.rotation.x = p.components["look-controls"].pitchObject.rotation.x;
-																camBack.components["look-controls"].yawObject.rotation.y = p.components["look-controls"].yawObject.rotation.y;
-															}, 5);
-				} else if (camFlag == 0 ) {
-					$('#change-view-text').text('Main View');
-					viewIcon.setAttribute('style', 'font-size: 1.2rem;');
-					clearInterval(backCamRefreshIntervalId);
-					//camBack.setAttribute('camera', 'active', false);
-					playerCam.setAttribute('camera', 'active', true);
-					
-					var playerAmmo = document.getElementById('player');	
-					playerAmmo.removeAttribute('ammo-shape');
-				}
-			});
-
-			scene.addEventListener('adapter-ready', ({ detail: adapter }) => {
-				// We don't use the syncOccupants API, set requestedOccupants to be the same array instance as availableOccupants				
-				adapter.requestedOccupants = adapter.availableOccupants;
-				const clientId = genClientId(); // generate a random 16 characters string, but you can use a uuid4 for example
-				adapter.setClientId(clientId);				
-				navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
-					adapter.setLocalMediaStream(stream).then(() => {
-						// Note that networked-scene audio:true option has no effect with the janus adapter
-						adapter.enableMicrophone(true); // set it to false if you want to be muted initially.
-						state.currentStream = stream;
-						adapter.setLocalMediaStream(stream);
-						getAudioVol();
+				scene.addEventListener('adapter-ready', ({ detail: adapter }) => {
+					// We don't use the syncOccupants API, set requestedOccupants to be the same array instance as availableOccupants				
+					adapter.requestedOccupants = adapter.availableOccupants;
+					const clientId = genClientId(); // generate a random 16 characters string, but you can use a uuid4 for example
+					adapter.setClientId(clientId);				
+					navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => {
+						adapter.setLocalMediaStream(stream).then(() => {
+							// Note that networked-scene audio:true option has no effect with the janus adapter
+							adapter.enableMicrophone(true); // set it to false if you want to be muted initially.
+							state.currentStream = stream;
+							adapter.setLocalMediaStream(stream);
+							getAudioVol();
+						});
+					}).catch(err => {
+						console.warn("Microphone access not allowed. This client will not broadcast audio.");
 					});
-				}).catch(err => {
-					console.warn("Microphone access not allowed. This client will not broadcast audio.");
 				});
-			});
-			
-			var els = document.getElementsByClassName("chair");
+				
+				var els = document.getElementsByClassName("chair");
 
-			Array.from(els).forEach((el) => {
-				// Do stuff here
-				//console.log(el.id);
-				el.addEventListener('click', function(e) {
-					//avatarClicked = networkedComponent.creator;
+				Array.from(els).forEach((el) => {
+					// Do stuff here
 					//console.log(el.id);
-					currentChair = el.id;
-					$('.chair-actions').addClass('show');
-					$('.chair-actions').css({top: cursorY, left: cursorX});
+					el.addEventListener('click', function(e) {
+						//avatarClicked = networkedComponent.creator;
+						//console.log(el.id);
+						currentChair = el.id;
+						$('.chair-actions').addClass('show');
+						$('.chair-actions').css({top: cursorY, left: cursorX});
+					});
 				});
-			});
+				window.sessionStorage.clear();
+			}
 		});
 
 		// Fired when a networked entity is created 
