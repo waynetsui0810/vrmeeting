@@ -10,7 +10,7 @@
         <script src="scripts/get-url-param.js"></script>
     </head>
     <body onload=getMeetings()>
-        <h2 style="text-align:center;">HA Virtual Meeting</h2>        
+        <h2 style="text-align:center;">HA Metaverse Meeting</h2>        
         <h3 style="text-align:center;">Please select room to join</h3>
         <div id="roomids">
             <table id="roominfo" width="100%" cellpadding="1" cellspacing="1">                
@@ -25,7 +25,7 @@
         const params = getUrlParams(); 
 
         function getMeetings() {    
-            console.log(window.sessionStorage);         
+            //console.log(window.sessionStorage);         
             if (window.sessionStorage.getItem('corpid') === null || window.sessionStorage.getItem('corpid') !== params.corpid) {
                 window.location.href = "/";
             } else {    
@@ -53,28 +53,33 @@
                                 
                                 let n = document.createElement('b');
                                 n.textContent = 'Room Name: ' + r.roomid;
-                                //c.appendChild(document.createTextNode('Room Name: ' + r.roomid));  
+                                //c.appendChild(document.createTextNode('Room Name: ' + r.roomid)); 
+                                let a = r.attendees;
+                                let p = r.participants;
+
                                 c.appendChild(n);
                                 c.appendChild(document.createElement('br'));
                                 c.appendChild(document.createElement('br'));
                                 c.appendChild(document.createTextNode('Meeting description: ' + r.description));
                                 c.appendChild(document.createElement('br'));                            
                                 c.appendChild(document.createElement('br'));
-                                c.appendChild(document.createTextNode('Attendees:'));                                
+                                c.appendChild(document.createTextNode('Attendees: (' + a.length + ')'));                                
                                 c.appendChild(document.createElement('br'));
-                                //let a = r.attendees;
-                                let p = r.participants;
-                                //console.log(p);
-                                /*
-                                a.forEach(function(att) {
-                                    c.appendChild(document.createTextNode(att.corpid));
+                                
+                                a.forEach(function(att) {                                    
+                                    p.forEach(function(pp) {
+                                        if (pp.corpid === att.corpid) {
+                                            c.appendChild(document.createTextNode(pp.nickname + " (" + att.corpid + ")"));
+                                        }
+                                    });                                    
                                     c.appendChild(document.createElement('br'));                                    
                                 });
-                                */
+                                /*
                                 p.forEach(function(att) {
                                     c.appendChild(document.createTextNode(att.nickname + " (" + att.corpid + ")"));
                                     c.appendChild(document.createElement('br'));
                                 });
+                                */
                                 c.appendChild(document.createElement('br'));
                                 o.appendChild(c);
 
@@ -82,7 +87,7 @@
                                 b.setAttribute('id', v);
                                 b.setAttribute('class', 'btn btn-primary');                            
                                 b.textContent = 'Join Room';
-                                b.setAttribute('onclick', 'joinRoom(this.id);');
+                                b.setAttribute('onclick', 'joinRoom(this.id, ' + a.length + ');');
                                 
                                 o.appendChild(b);
                                 o.appendChild(document.createTextNode(' '));
@@ -398,10 +403,14 @@
             }); 
         }
 
-        function joinRoom(roomId) {                        
+        function joinRoom(roomId, num_attend) {                        
             window.sessionStorage.setItem('r', roomId);
             window.sessionStorage.setItem('u', params.corpid);
-            window.location.href = "/aframe.html?room="+roomId+"&corpid="+params.corpid;     
+            if (num_attend < 10) {
+                window.location.href = "/aframe.html?room="+roomId+"&corpid="+params.corpid;     
+            } else {
+                window.location.href = "/aframe-big.html?room="+roomId+"&corpid="+params.corpid; 
+            }
             
         }
 

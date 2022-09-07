@@ -562,15 +562,15 @@
         function nextDemoStep(step) {
             let demo_step = document.getElementById('demo-step');
             const steps = {};
-            steps[1] = "1. You are now in the Avatar's Main View, you may change the viewport by clicking the <i id='viewpoint-icon' class='bi bi-person-bounding-box' style='font-size:1.2rem;'></i> button.";
-            steps[2] = "2. You changed the viewpoint so that the scene camera is on the back of the Avatar. click the <i id='viewpoint-icon' class='bi bi-person-bounding-box' style='font-size:1.2rem;'></i> again to set the scene camera further.";
+            steps[1] = "1. You are now in the Avatar's Main View, click the <i id='viewpoint-icon' class='bi bi-person-bounding-box' style='font-size:1.2rem;'></i> button to move the scene camera to back.";
+            steps[2] = "2. Click the <i id='viewpoint-icon' class='bi bi-person-bounding-box' style='font-size:1.2rem;'></i> again to set the scene camera further.";
             steps[3] = "3. Now please press the 'W' or 'Up-Arrow' button to move forward until reached the sphere.";
             steps[4] = "4. Now please press the 'S' or 'Down-Arrow' button to move backward until outside the room.";
             steps[5] = "5. Now please press the 'A' or 'Left-Arrow' button to move left until reached the cube.";
             steps[6] = "6. Now please press the 'D' or 'Right-Arrow' button to move right until reached the cone.";
             steps[7] = "7. Now please use the mouse left button, press and hold and drag to look around. Then please go back inside the room.";
-            steps[8] = "8. You can also change the viewpoint to the front so that you could see your avatar's face. Click the <i id='viewpointFront-icon' class='bi bi-layer-backward' style='font-size:1rem;'></i> button to change."
-            steps[9] = "Completed. Please enjoy or click <a href='/' target='_self'>HERE</a> to back to login page.";
+            steps[8] = "8. Click the <i id='viewpointFront-icon' class='bi bi-layer-backward' style='font-size:1rem;'></i> button to change the scene camera to front."
+            steps[9] = "Completed tutorial. Please enjoy or click <a href='/' target='_self'>HERE</a> to back to login page.";
             //console.log(steps[step]);
             let ps = document.getElementById('step-id');
             if (ps !== null) {
@@ -1038,7 +1038,48 @@
 						
 			document.getElementById("spectatorScreenDiv").style.display = "none";
 			
+			var keyPressed = {};
 			document.addEventListener('keydown', function(evt) {
+				keyPressed[evt.key] = evt.type == 'keydown';
+
+				//W
+				if (keyPressed['w'] || keyPressed['ArrowUp']) {
+					//console.log('w');
+					localAvatar.setAttribute('rotation', '0 180 0');
+				}
+
+				//A
+				if (keyPressed['a'] || keyPressed['ArrowLeft']) {
+					//console.log('a');
+					localAvatar.setAttribute('rotation', '0 270 0');
+				}
+
+				//S
+				if (keyPressed['s'] || keyPressed['ArrowDown']) {
+					//console.log('s');
+					localAvatar.setAttribute('rotation', '0 0 0');
+				}
+
+				//D
+				if (keyPressed['d'] || keyPressed['ArrowRight']) {
+					//console.log('d');
+					localAvatar.setAttribute('rotation', '0 90 0');
+				}
+
+				if ((keyPressed['s'] && keyPressed['d']) || (keyPressed['ArrowDown'] && keyPressed['ArrowRight'])) {
+					//console.log('s d');
+					localAvatar.setAttribute('rotation', '0 45 0');
+				} else if ((keyPressed['w'] && keyPressed['d']) || (keyPressed['ArrowUp'] && keyPressed['ArrowRight'])) {
+					//console.log('w d');
+					localAvatar.setAttribute('rotation', '0 135 0');
+				} else if ((keyPressed['w'] && keyPressed['a']) || (keyPressed['ArrowUp'] && keyPressed['ArrowLeft'])) {
+					//console.log('w a');
+					localAvatar.setAttribute('rotation', '0 225 0');
+				} else if ((keyPressed['a'] && keyPressed['s']) || (keyPressed['ArrowLeft'] && keyPressed['ArrowDown'])) {
+					//console.log('a s');
+					localAvatar.setAttribute('rotation', '0 315 0');
+				}
+				
 				if (evt.keyCode === 87 || evt.keyCode === 65 || evt.keyCode === 83 || evt.keyCode === 68 || evt.keyCode ===38 || evt.keyCode === 37 || evt.keyCode === 39 || evt.keyCode === 40) {
 					//if (sitFlag == "Y") {
 					if (state.sit) {
@@ -1091,6 +1132,9 @@
 				if (evt.keyCode === 78) {					
 					noBtnEl.click();
 				}	
+				
+				keyPressed[evt.key] = false;
+				//keyPressed = {};
 			});
 			//End set player animation
 			
