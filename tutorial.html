@@ -16,8 +16,18 @@
 		<script src="scripts/aframe-environment-component.min.js"></script>		
 		
 		<script src="scripts/aframe-extras.min.js"></script>
+		<script src="scripts/oculus-thumbstick-controls.js"></script>
 		
 		<script>
+			AFRAME.registerComponent('thumbstick-logging', {
+				init: function() {
+					this.el.addEventListener('thumbstickmoved', this.logThumbstick);
+				},
+				logThumbstick: function(evt) {
+					console.log(evt);
+				}
+			});
+
 			AFRAME.registerComponent('model-opacity', {
 				schema: {default: 1.0},
 				init: function () {
@@ -141,7 +151,7 @@
 		raycaster="objects:.raycastable"
 		inspector-plugin-recast
 		light="defaultLightsEnabled: false"
-		vr-mode-ui="enabled: false"
+		
 		physics="driver: ammo; debug: false; debugDrawMode: 1;"
 		>
 		<a-assets>
@@ -198,6 +208,8 @@
 			</a-entity>
 			<a-entity id="localAvatar" class="localAvatar" rotation="0 180 0" scale="1.6 1.6 1.6" position="0 0 0.6">
 			</a-entity>			
+			<a-entity oculus-touch-contorls="hand:left"></a-entity>
+			<a-entity oculus-touch-contorls="hand:right" oculus-thumbstick-controls="rigSelector:#player"></a-entity>
 			<!--<a-sphere color="red" radius="0.3" position="0 2 -0.1"></a-sphere>-->
 		</a-entity>		
 		<!--adds the text with custom font-->
@@ -222,7 +234,7 @@
 		<a-entity 
 			  geometry="primitive: plane; width: 50; height: 50;" rotation="-90 0 0"
 			  material="src: #floor; repeat: 30 30; transparent: true;"
-			  <!--material="src: #grid; repeat: 50 50; transparent: true;metalness:0.6; roughness: 0.4; sphericalEnvMap: #sky;"-->			  
+			    
 			  >
 		</a-entity>
 
@@ -281,8 +293,11 @@
 		<a-light type="directional" intensity="0.2" position="0 0 0" rotation="0 270 0" target="#directionaltargetb">
     		<a-entity id="directionaltargetb" position="0 0 -1"></a-entity>
 		</a-light>
-		
-		<a-entity camera id='camBack' position="-14 0 3" active="false" wasd-controls="acceleration: 27" look-controls></a-entity>
+		<a-entity id="bcam">
+			<a-entity camera id='camBack' position="-14 0 3" active="false" wasd-controls="acceleration: 27" look-controls></a-entity>
+			<a-entity oculus-touch-controls="hand:left"></a-entity>
+			<a-entity oculus-touch-controls="hand: right" oculus-thumbstick-controls="rigSelector:#bcam"></a-entity>
+		</a-entity>
 	</a-scene>
 
 	<div id="spectatorDiv" style="opacity: 0;text-align: right; background-color: transparent;">		
