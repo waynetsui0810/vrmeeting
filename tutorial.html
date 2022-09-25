@@ -208,8 +208,8 @@
 			</a-entity>
 			<a-entity id="localAvatar" class="localAvatar" rotation="0 180 0" scale="1.6 1.6 1.6" position="0 0 0.6">
 			</a-entity>			
-			<a-entity oculus-touch-contorls="hand:left"></a-entity>
-			<a-entity oculus-touch-contorls="hand:right" oculus-thumbstick-controls="rigSelector:#player"></a-entity>
+			<a-entity oculus-touch-contorls="hand:left" oculus-thumbstick-controls="rigSelector:#player; hands:left"></a-entity>
+			<a-entity oculus-touch-contorls="hand:right" oculus-thumbstick-controls="rigSelector:#player; hands:right"></a-entity>
 			<!--<a-sphere color="red" radius="0.3" position="0 2 -0.1"></a-sphere>-->
 		</a-entity>		
 		<!--adds the text with custom font-->
@@ -295,8 +295,8 @@
 		</a-light>
 		<a-entity id="bcam">
 			<a-entity camera id='camBack' position="-14 0 3" active="false" wasd-controls="acceleration: 27" look-controls></a-entity>
-			<a-entity oculus-touch-controls="hand:left"></a-entity>
-			<a-entity oculus-touch-controls="hand: right" oculus-thumbstick-controls="rigSelector:#bcam"></a-entity>
+			<a-entity oculus-touch-controls="hand:left" oculus-thumbstick-controls="rigSelector:#bcam; hands:left"></a-entity>
+			<a-entity oculus-touch-controls="hand: right" oculus-thumbstick-controls="rigSelector:#bcam; hands:right"></a-entity>
 		</a-entity>
 	</a-scene>
 

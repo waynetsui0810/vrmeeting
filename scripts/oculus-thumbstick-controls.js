@@ -10,20 +10,25 @@ AFRAME.registerComponent('oculus-thumbstick-controls', {
         adEnabled: {default: true},
         adInverted: {default: false},
         wsEnabled: {default: true},
-        wsInverted: {default: false}
+        wsInverted: {default: false},
+        hands: {default: "left"}
     },
     init: function () {
         this.easing = 1.1;
         this.velocity = new THREE.Vector3(0, 0, 0);
         this.tsData = new THREE.Vector2(0, 0);
+        console.log(this.data);
 
         this.thumbstickMoved = this.thumbstickMoved.bind(this)
         this.el.addEventListener('thumbstickmoved', this.thumbstickMoved);
-        this.el.addEventListener('abuttondown', this.abuttonDown);
+        //this.el.addEventListener('abuttondown', this.abuttonDown);
         this.el.addEventListener('abuttonup', this.abuttonUp);
-        this.el.addEventListener('abuttontouchstart', this.abuttontouchStart);
-        this.el.addEventListener('abuttontouchend', this.abuttontouchEnd);
-        this.el.addEventListener('abuttonchanged', this.abuttonChanged);
+        //this.el.addEventListener('abuttontouchstart', this.abuttontouchStart);
+        //this.el.addEventListener('abuttontouchend', this.abuttontouchEnd);
+        //this.el.addEventListener('abuttonchanged', this.abuttonChanged);
+        this.el.addEventListener('bbuttonup', this.bbuttonUp);
+        this.el.addEventListener('xbuttonup', this.xbuttonUp);
+        this.el.addEventListener('ybuttonup', this.ybuttonUp);
     },
     update: function() {
         this.rigElement = document.querySelector(this.data.rigSelector)
@@ -33,7 +38,7 @@ AFRAME.registerComponent('oculus-thumbstick-controls', {
         var data = this.data;
         var el = this.rigElement
         var velocity = this.velocity;
-        console.log("here", this.tsData, this.tsData.length())
+        //console.log("here", this.tsData, this.tsData.length())
         if (!velocity[data.adAxis] && !velocity[data.wsAxis] && !this.tsData.length()) { return; }
 
         // Update velocity.
@@ -130,6 +135,15 @@ AFRAME.registerComponent('oculus-thumbstick-controls', {
     },
     abuttonChanged: function(evt) {
         console.log("A button Changed" + evt);
+    },
+    bbuttonUp: function(evt) {
+        console.log("B button Up" + evt);
+    },
+    xbuttonUp: function(evt) {
+        console.log("X button Up" + evt);
+    },
+    ybuttonUp: function(evt) {
+        console.log("Y button Up" + evt);
     },
     remove: function () {
         this.el.removeEventListener('thumbstickmoved', this.thumbstickMoved);
